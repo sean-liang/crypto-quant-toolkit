@@ -1,7 +1,7 @@
 numpy
+ta-lib
 pandas
 pandas_ta
-ta-lib
 ccxt
 tqdm
 requests

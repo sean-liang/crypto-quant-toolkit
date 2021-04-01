@@ -1,5 +1,4 @@
 import argparse
-import importlib
 import pytz
 from datetime import datetime, timezone
 import timeit
@@ -10,14 +9,10 @@ from commons.constants import CANDLE_DATETIME_COLUMN
 from pipeline.pipeline import Pipeline
 
 
-def run_back_testing(input_file, pipes, config, *, begin, end, tz):
+def run_back_testing(input_file, pipes, config, *, begin, end, offset, tz):
     # 载入策略
-    print('pipeline parameters: ', config)
-    pipeline = Pipeline()
-    for p in pipes:
-        pipe = importlib.import_module(p)
-        pipeline.extend(pipe.build(config))
-        print(f'load pipe: {pipe.__name__}')
+    config['tz'] = tz
+    pipeline = Pipeline.build(pipes, config)
 
     # 载入数据
     df = pd.read_parquet(input_file)
@@ -25,6 +20,9 @@ def run_back_testing(input_file, pipes, config, *, begin, end, tz):
     candle_date = df[CANDLE_DATETIME_COLUMN].dt.date
     if begin:
         begin = begin_of_day(datetime.strptime(begin, '%Y-%m-%d'), tz=tz)
+        df = df[candle_date >= begin.date()]
+    elif offset:
+        begin = df.iat[0, 0] + pd.Timedelta(days=offset)
         df = df[candle_date >= begin.date()]
     if end:
         end = end_of_day(datetime.strptime(end, '%Y-%m-%d'), tz=tz)
@@ -36,7 +34,11 @@ def run_back_testing(input_file, pipes, config, *, begin, end, tz):
     end_time = timeit.default_timer()
     elapse = end_time - start_time
     print(f'calculation takes {elapse:.2f}s')
-    print(df[df['signal'].notnull()])
+
+    pd.set_option('display.max_rows', 300)
+    pd.set_option('display.min_rows', 300)
+    print(df)
+
 
 
 if __name__ == '__main__':
@@ -45,8 +47,10 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--pipes', nargs='+', required=True, help='pipelines')
     parser.add_argument('-b', '--begin', help='begin date')
     parser.add_argument('-d', '--end', help='end date')
+    parser.add_argument('--skip-days', default=10, help='skip days from begin date, default: 10')
     parser.add_argument('-z', '--timezone', default='UTC', help='timezone, default: UTC')
     parser.add_argument('-c', '--config', nargs='*', action=ParseKwargs)
     args = parser.parse_args()
 
-    run_back_testing(args.input, args.pipes, args.config, begin=args.begin, end=args.end, tz=args.timezone)
+    run_back_testing(args.input, args.pipes, args.config, begin=args.begin, end=args.end, offset=args.skip_days,
+                     tz=args.timezone)

@@ -4,6 +4,9 @@ from commons.constants import CANDLE_COLUMNS, CANDLE_DATETIME_COLUMN
 
 
 class DailyCandleCSVWriter:
+    """
+    将K线数据按日分割存储为CSV文件
+    """
 
     def __init__(self, output_folder, symbol, interval, timezone):
         self._output_folder = output_folder
