@@ -1,10 +1,5 @@
 import argparse
-import time
-from pathlib import Path
-from datetime import datetime, timedelta, timezone
-import pytz
 import pandas as pd
-from tqdm import tqdm
 import ccxt
 
 

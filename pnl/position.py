@@ -13,7 +13,7 @@ def position_from_signal(df, **kwargs):
     return df
 
 
-def disallowed_transaction_daily_time(df, utc_hour=8, utc_minute=0, **kwargs):
+def disallow_transaction_daily_time(df, utc_hour=8, utc_minute=0, **kwargs):
     """
     针对每天特定时刻不允许交易的情况，调整持仓
     :param df: dataframe

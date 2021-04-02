@@ -3,6 +3,7 @@ import pytz
 from datetime import datetime, timezone
 import timeit
 import pandas as pd
+from commons.io import load_dataframe_by_ext
 from commons.argparse_commons import ParseKwargs
 from commons.datetime_utils import begin_of_day, end_of_day
 from commons.constants import CANDLE_DATETIME_COLUMN
@@ -15,7 +16,7 @@ def run_back_testing(input_file, pipes, config, *, begin, end, offset, tz):
     pipeline = Pipeline.build(pipes, config)
 
     # 载入数据
-    df = pd.read_parquet(input_file)
+    df = load_dataframe_by_ext(input_file)
     tz = pytz.timezone(args.timezone) if tz else timezone.utc
     candle_date = df[CANDLE_DATETIME_COLUMN].dt.date
     if begin:
@@ -35,15 +36,14 @@ def run_back_testing(input_file, pipes, config, *, begin, end, offset, tz):
     elapse = end_time - start_time
     print(f'calculation takes {elapse:.2f}s')
 
-    pd.set_option('display.max_rows', 300)
-    pd.set_option('display.min_rows', 300)
-    print(df)
-
+    df = df.drop(columns=['signal', 'volume', 'BBL', 'BBM', 'BBU', 'BBB'])
+    # print(df[df['equity_curve'] < 0.7].head(100))
+    # print(df)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='run back testing')
-    parser.add_argument('input', help='history candle parquet file')
+    parser.add_argument('input', help='history candle file')
     parser.add_argument('-p', '--pipes', nargs='+', required=True, help='pipelines')
     parser.add_argument('-b', '--begin', help='begin date')
     parser.add_argument('-d', '--end', help='end date')

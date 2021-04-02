@@ -12,5 +12,9 @@ class WrapPandas:
         return func(**self._kwargs)
 
 
-def dropna(df, **kwargs):
+def drop_na(df, **kwargs):
     return df.dropna()
+
+
+def drop_column(df, **kwargs):
+    return df.drop(columns=kwargs['columns'])

@@ -1,15 +1,15 @@
 import argparse
-import pandas as pd
+from commons.io import load_dataframe_by_ext
 from commons.constants import CANDLE_DATETIME_COLUMN
 
 
 def find_time_series_gaps(file, threshold):
-    df = pd.read_parquet(file)
+    df = load_dataframe_by_ext(file)
     df.sort_values(CANDLE_DATETIME_COLUMN, inplace=True)
     df = df[[CANDLE_DATETIME_COLUMN]]
     df['begin'] = df[CANDLE_DATETIME_COLUMN].shift(1)
     df.rename(columns={CANDLE_DATETIME_COLUMN: 'end'}, inplace=True)
-    df.dropna(inplace=True)
+    df.drop_na(inplace=True)
     df = df[['begin', 'end']]
     df['gap_seconds'] = df['end'] - df['begin']
     df['gap_minutes'] = df['gap_seconds'].dt.total_seconds() / 60
