@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from signals.commons import merge_long_short_signal
 from commons.constants import CANDLE_CLOSE_COLUMN
 

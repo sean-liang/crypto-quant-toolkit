@@ -3,7 +3,7 @@ import pytz
 from datetime import datetime, timezone
 import timeit
 import pandas as pd
-from commons.io import load_dataframe_by_ext
+from commons.io import load_candle_by_ext
 from commons.argparse_commons import ParseKwargs
 from commons.datetime_utils import begin_of_day, end_of_day
 from commons.constants import CANDLE_DATETIME_COLUMN
@@ -16,7 +16,7 @@ def run_back_testing(input_file, pipes, config, *, begin, end, offset, tz):
     pipeline = Pipeline.build(pipes, config)
 
     # 载入数据
-    df = load_dataframe_by_ext(input_file)
+    df = load_candle_by_ext(input_file)
     tz = pytz.timezone(args.timezone) if tz else timezone.utc
     candle_date = df[CANDLE_DATETIME_COLUMN].dt.date
     if begin:
@@ -37,8 +37,7 @@ def run_back_testing(input_file, pipes, config, *, begin, end, offset, tz):
     print(f'calculation takes {elapse:.2f}s')
 
     df = df.drop(columns=['signal', 'volume', 'BBL', 'BBM', 'BBU', 'BBB'])
-    # print(df[df['equity_curve'] < 0.7].head(100))
-    # print(df)
+    print(df)
 
 
 if __name__ == '__main__':

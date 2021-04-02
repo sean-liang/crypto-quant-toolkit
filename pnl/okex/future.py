@@ -13,10 +13,4 @@ def build(params):
     disallowed_transaction_on_16pm_cst = partial(disallow_transaction_daily_time, utc_hour=8, utc_minute=0)
 
     # 计算收益曲线
-    p = params
-    pnl = FuturePnL(cash=p['pnl_cash'], face_value=p['pnl_face_value'],
-                    min_trade_precision=p['pnl_min_trade_precision'], leverage_rate=p['pnl_leverage_rate'],
-                    slippage_mode=p['pnl_slippage_mode'], slippage=p['pnl_slippage'],
-                    commission=p['pnl_commission'], min_margin_ratio=p['pnl_min_margin_ratio'])
-
-    return position_from_signal, disallowed_transaction_on_16pm_cst, pnl.calculate
+    return position_from_signal, disallowed_transaction_on_16pm_cst, FuturePnL(**params).calculate

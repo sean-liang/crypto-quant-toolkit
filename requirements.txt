@@ -6,3 +6,4 @@ ccxt
 tqdm
 requests
 pyarrow
+tables

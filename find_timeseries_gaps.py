@@ -1,10 +1,10 @@
 import argparse
-from commons.io import load_dataframe_by_ext
+from commons.io import load_candle_by_ext
 from commons.constants import CANDLE_DATETIME_COLUMN
 
 
 def find_time_series_gaps(file, threshold):
-    df = load_dataframe_by_ext(file)
+    df = load_candle_by_ext(file)
     df.sort_values(CANDLE_DATETIME_COLUMN, inplace=True)
     df = df[[CANDLE_DATETIME_COLUMN]]
     df['begin'] = df[CANDLE_DATETIME_COLUMN].shift(1)
