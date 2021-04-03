@@ -27,4 +27,6 @@ def resample_time_window(df, resample_period='15T', resample_drop_zero_volume='1
     period_df.reset_index(inplace=True)
     df = period_df[CANDLE_COLUMNS]
 
+    # df.to_parquet('../data/course/BTC-USDT_15m.parquet')
+
     return df

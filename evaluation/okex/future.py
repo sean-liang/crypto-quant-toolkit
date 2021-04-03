@@ -1,6 +1,6 @@
 from functools import partial
 from evaluation.position import position_from_signal, disallow_transaction_daily_time
-from evaluation.position import position_from_signal
+from data.skip_n_days_candle_data import build as build_skip_n_days
 from evaluation.okex.equity_curve import OKExEquityCurve
 
 
@@ -13,5 +13,7 @@ def build(params):
     disallowed_transaction = partial(disallow_transaction_daily_time, dtd_hour=params['dtd_hour'],
                                      dtd_minute=params['dtd_minute'])
 
+    skip_n_days = build_skip_n_days(params)
+
     # 计算收益曲线
-    return position_from_signal, disallowed_transaction, OKExEquityCurve(**params).calculate
+    return position_from_signal, disallowed_transaction, skip_n_days, OKExEquityCurve(**params).calculate

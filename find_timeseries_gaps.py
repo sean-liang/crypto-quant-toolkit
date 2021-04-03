@@ -1,11 +1,10 @@
 import argparse
-import pytz
 from commons.io import load_candle_by_ext
 from commons.constants import CANDLE_DATETIME_COLUMN
-from commons.datetime_utils import timezone_offset_delta
+from commons.datetime_utils import timezone_offset_delta, str_to_timezone
 
 
-def find_time_series_gaps(file, column, threshold, timezone=pytz.utc):
+def find_time_series_gaps(file, column, threshold, timezone):
     print('file: ', file)
     print('column: ', column)
     print(f'threshold: {threshold} days')
@@ -37,4 +36,4 @@ if __name__ == '__main__':
     parser.add_argument('-z', '--timezone', default='UTC', help='output timezone, default: UTC')
     args = parser.parse_args()
 
-    find_time_series_gaps(args.file, args.column, args.threshold, timezone=pytz.timezone(args.timezone))
+    find_time_series_gaps(args.file, args.column, args.threshold, timezone=str_to_timezone(args.timezone))

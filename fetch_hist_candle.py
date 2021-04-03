@@ -1,18 +1,17 @@
 import argparse
 import time
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
-import pytz
 import pandas as pd
 from tqdm import tqdm
 import ccxt
 from commons.time_interval import TimeInterval
-from commons.datetime_utils import dt_to_str, ts_to_str, dt_to_mills, begin_of_day, end_of_day
+from commons.datetime_utils import dt_to_str, ts_to_str, dt_to_mills, str_to_timezone
+from commons.argparse_commons import parse_period_arguments
 from commons.daily_candle_csv_writer import DailyCandleCSVWriter
 
 
 def fetch_hist_ohlc(exchange, symbols, intervals, begin_dt, end_dt, output_folder, *, market='spot', npr=1000,
-                    sleep=0.1, tz=timezone.utc):
+                    sleep=0.1, tz):
     """
     使用ccxt抓取并保存指定交易所、多组交易对、指定时间段的K线历史数据
     :param exchange: ccxt交易所
@@ -82,34 +81,6 @@ def get_matched_symbols(exchange, symbols):
     return results
 
 
-def parse_fetch_period_arguments(begin, end, periods, *, tz):
-    if end:
-        end = datetime.strptime(end, '%Y-%m-%d') if isinstance(end, str) else end
-        end = end_of_day(end, tz)
-        if begin:
-            begin = datetime.strptime(begin, '%Y-%m-%d')
-            begin = begin_of_day(begin, tz)
-        elif periods:
-            begin = end - timedelta(days=periods) + timedelta(seconds=1)
-        else:
-            begin = end - timedelta(days=30) + timedelta(seconds=1)  # 默认结束时间向前30天
-    elif begin:
-        begin = datetime.strptime(begin, '%Y-%m-%d')
-        begin = begin_of_day(begin, tz)
-        if periods:
-            end = begin + timedelta(days=periods) - timedelta(seconds=1)
-        else:
-            # 只设置开始时间，结束时间默认为昨天
-            end = datetime.now(tz=tz) - timedelta(days=1)
-            end = end_of_day(end, tz)
-
-    # 没有设置任何参数，默认从昨天开始向前取
-    if not (begin and end):
-        return parse_fetch_period_arguments(None, datetime.now(tz=tz) - timedelta(days=1), periods, tz=tz)
-
-    return begin, end
-
-
 if __name__ == '__main__':
     default_symbols = ['BTC/USDT', 'ETH/USDT', 'EOS/USDT', 'LTC/USDT']
     default_intervals = ['5m', '15m']
@@ -150,9 +121,9 @@ if __name__ == '__main__':
     print(f'candle intervals: {(", ").join(candle_intervals)}')
 
     # 时区
-    tz = pytz.timezone(args.timezone)
-    begin, end = parse_fetch_period_arguments(args.begin, args.end, args.periods, tz=tz)
-    print(f'fetch period: {dt_to_str(begin)} ~ {dt_to_str(end)}, timezone: {tz}')
+    tz = str_to_timezone(args.timezone)
+    begin, end = parse_period_arguments(args.begin, args.end, args.periods, tz=tz)
+    print(f'fetch period: {dt_to_str(begin)} ~ {dt_to_str(end)}, timezone: {tz.zone}')
 
     # 输出文件夹
     output_folder = Path(args.output)

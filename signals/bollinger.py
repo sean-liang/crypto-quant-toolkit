@@ -30,7 +30,9 @@ def boll_trend(df, **kwargs):
     df.loc[cover_short_cond1 & cover_short_cond2, 'signal_short'] = 0  # 上穿均线，平空
 
     # 合并多空指标
-    df = merge_long_short_signal(df, drop_original=True)
+    df = merge_long_short_signal(df, fill_na=True, drop_original=True)
+
+    # df.to_parquet('../data/course/signals.parquet')
 
     if 'bbands_drop_columns' in kwargs and kwargs['bbands_drop_columns'] == '1':
         df.drop(columns=['BBU', 'BBM', 'BBL', 'BBB'], inplace=True)

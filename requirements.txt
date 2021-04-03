@@ -2,6 +2,8 @@ numpy
 ta-lib
 pandas
 pandas_ta
+scipy
+scikit-opt
 ccxt
 tqdm
 requests

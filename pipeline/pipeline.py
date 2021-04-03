@@ -5,7 +5,6 @@ class Pipeline:
     """
     处理管道
     """
-
     def __init__(self, config, *func_list):
         self._config = config
         self._func_list = func_list if func_list else []
