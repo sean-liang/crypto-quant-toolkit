@@ -42,8 +42,8 @@ class FuturePnL:
         # 买入合约数 = 固定资金 * 杠杆 / (合约面值 * 开盘价)
         df.loc[open_pos_cond, 'contract_num'] = self._contract_num(df[CANDLE_OPEN_COLUMN])
         # 根据滑点计算实际开仓价格
-        df.loc[open_pos_cond, 'open_pos_price'] = self._price_with_slippage(df[CANDLE_OPEN_COLUMN], df[POSITION_COLUMN],
-                                                                            open_pos_cond)
+        df['open_pos_price'] = self._price_with_slippage(df[CANDLE_OPEN_COLUMN], df[POSITION_COLUMN], open_pos_cond)
+
         # 保证金（扣减手续费）
         df['cash'] = self._cash - df['open_pos_price'] * self._face_value * df['contract_num'] * self._commission
 
@@ -111,10 +111,10 @@ class FuturePnL:
         计算滑点
         """
         # 根据滑点计算实际开仓价格
-        if self._slippage_mode is 'fixed':
+        if self._slippage_mode == 'fixed':
             # 固定滑点
             return np.where(cond, fixed_slippage(price_series, self._slippage), np.NaN)
-        elif self._slippage_mode is 'ratio':
+        elif self._slippage_mode == 'ratio':
             # 比例滑点
             return np.where(cond, ratio_slippage(price_series, direction_series, self._slippage), np.NaN)
         else:

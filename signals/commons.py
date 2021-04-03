@@ -14,8 +14,10 @@ def merge_long_short_signal(df, *, column_name=SIGNAL_COLUMN, fill_na=True, drop
     tmp_df = tmp_df[tmp_df[column_name] != tmp_df[column_name].shift(1)]
 
     df[column_name] = tmp_df[column_name]
+
     if drop_original:
         df.drop(columns=['signal_long', 'signal_short'], inplace=True)
+
     if fill_na:
         df.fillna(method='ffill', inplace=True)
         df.fillna(value=0, inplace=True)

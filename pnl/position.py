@@ -25,4 +25,5 @@ def disallow_transaction_daily_time(df, utc_hour=8, utc_minute=0, **kwargs):
     minute_cond = df[CANDLE_DATETIME_COLUMN].dt.minute == utc_minute
     df[POSITION_COLUMN] = np.where(hour_cond & minute_cond, pd.NaT, df[POSITION_COLUMN])
     df[POSITION_COLUMN].fillna(method='ffill', inplace=True)
+
     return df

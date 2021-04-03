@@ -22,7 +22,7 @@ def run_back_testing(input_file, pipes, config, *, begin, end, offset, tz):
     if begin:
         begin = begin_of_day(datetime.strptime(begin, '%Y-%m-%d'), tz=tz)
         df = df[candle_date >= begin.date()]
-    elif offset:
+    elif offset > 0:
         begin = df.iat[0, 0] + pd.Timedelta(days=offset)
         df = df[candle_date >= begin.date()]
     if end:
@@ -36,7 +36,6 @@ def run_back_testing(input_file, pipes, config, *, begin, end, offset, tz):
     elapse = end_time - start_time
     print(f'calculation takes {elapse:.2f}s')
 
-    df = df.drop(columns=['signal', 'volume', 'BBL', 'BBM', 'BBU', 'BBB'])
     print(df)
 
 
@@ -46,7 +45,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--pipes', nargs='+', required=True, help='pipelines')
     parser.add_argument('-b', '--begin', help='begin date')
     parser.add_argument('-d', '--end', help='end date')
-    parser.add_argument('--skip-days', default=10, help='skip days from begin date, default: 10')
+    parser.add_argument('--skip-days', default=0, help='skip days from begin date, default: 0')
     parser.add_argument('-z', '--timezone', default='UTC', help='timezone, default: UTC')
     parser.add_argument('-c', '--config', nargs='*', action=ParseKwargs)
     args = parser.parse_args()

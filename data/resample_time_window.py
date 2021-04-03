@@ -6,7 +6,8 @@ def build(params):
     return resample_time_window
 
 
-def resample_time_window(df, resample_period='15T', resample_drop_zero_volume='1', resample_drop_zero_open='1', **kwargs):
+def resample_time_window(df, resample_period='15T', resample_drop_zero_volume='1', resample_drop_zero_open='1',
+                         **kwargs):
     """合成长时间K线"""
     period_df = df.resample(rule=resample_period, on=CANDLE_DATETIME_COLUMN, label='left', closed='left').agg(
         {CANDLE_OPEN_COLUMN: 'first',
@@ -25,4 +26,5 @@ def resample_time_window(df, resample_period='15T', resample_drop_zero_volume='1
 
     period_df.reset_index(inplace=True)
     df = period_df[CANDLE_COLUMNS]
+
     return df
