@@ -124,7 +124,8 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--end', help='end date, default: date of yesterday')
     parser.add_argument('-p', '--periods', type=int,
                         help='fetch period in days, works when only one of begin or end is specified')
-    parser.add_argument('-z', '--timezone', default='UTC', help='timezone, default: UTC')
+    parser.add_argument('-z', '--timezone', default='UTC',
+                        help='begin, end date timezone(not for candle begin time), default: UTC')
     parser.add_argument('-o', '--output', default='../data', help='output folder, default: ../data')
     parser.add_argument('--market', default='spot', help='market, default: spot')
     parser.add_argument('--items-per-request', type=int, default=1000,

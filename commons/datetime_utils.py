@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
 
 
-def dt_to_str(dt: datetime):
+def dt_to_str(dt: datetime, *, with_timezone=False):
     """
     日期时间对象转字符串
     """
-    return dt.strftime('%Y-%m-%d %H:%M:%S')
+    return dt.strftime('%Y-%m-%d %H:%M:%S' + ' %z' if with_timezone else '')
 
 
 def ts_to_str(mills, tz):
@@ -34,3 +34,8 @@ def end_of_day(dt: datetime, tz: timezone):
     将时间设置为当日结束(23:59:59)
     """
     return dt.replace(hour=23, minute=59, second=59, microsecond=0, tzinfo=tz)
+
+
+def timezone_offset_delta(tz):
+    """计算pytz时区的时间偏移"""
+    return tz.utcoffset(datetime.now())

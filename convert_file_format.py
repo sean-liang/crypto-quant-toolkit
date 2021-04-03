@@ -1,8 +1,6 @@
 import argparse
-import pandas as pd
 from commons.argparse_commons import ParseKwargs
 from commons.io import load_by_ext, save_by_ext
-from commons.constants import CANDLE_COLUMNS, CANDLE_DATETIME_COLUMN
 
 
 def convert_h5_to_parquet(input_path, output_path, in_params, out_params):
@@ -15,7 +13,8 @@ def convert_h5_to_parquet(input_path, output_path, in_params, out_params):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='convert dataframe files, supported formats: .csv, .h5, .parquet')
+    parser = argparse.ArgumentParser(
+        description='convert dataframe file format, supported formats: .csv, .h5, .parquet')
     parser.add_argument('input', help='input file')
     parser.add_argument('output', help='output file')
     parser.add_argument('--input-config', nargs='*', action=ParseKwargs)

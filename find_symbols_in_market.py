@@ -3,7 +3,7 @@ import pandas as pd
 import ccxt
 
 
-def find_symbols(exchange, trade_type, patterns):
+def find_symbols(exchange, trade_type, symbols):
     columns = ['symbol', 'type', 'taker', 'maker', 'amount_precision', 'price_precision']
     print('load markets...')
     markets = exchange.load_markets()
@@ -13,10 +13,10 @@ def find_symbols(exchange, trade_type, patterns):
     df = pd.DataFrame(data, columns=columns)
     if trade_type:
         df = df[df['type'].str.contains(trade_type)]
-    if patterns:
+    if symbols:
         conds = None
-        for pat in patterns:
-            c = df['symbol'].str.contains(pat) | df['symbol'].str.match(pat, case=False)
+        for sym in symbols:
+            c = df['symbol'].str.contains(sym) | df['symbol'].str.match(sym, case=False)
             conds = conds | c if conds is not None else c
         df = df[conds]
     df.reset_index(inplace=True, drop=True)
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='find symbols in market')
     parser.add_argument('exchange', help='ccxt supported exchange, default: binance')
     parser.add_argument('type', help='type: spot, future, option, margin, delivery')
-    parser.add_argument('-p', '--patterns', nargs='+', help=f'symbol string or regex patterns')
+    parser.add_argument('-s', '--symbols', nargs='+', help=f'symbol string or regex patterns')
     args = parser.parse_args()
 
     # 交易所
@@ -40,14 +40,14 @@ if __name__ == '__main__':
     print(f'exchange: {exchange_name}')
 
     # 交易对
-    patterns = None
-    if args.patterns:
-        patterns = [pat.strip() for pat in args.patterns]
-        print(f'patterns: ', ', '.join(patterns))
+    symbols = None
+    if args.symbols:
+        symbols = [sym.strip() for sym in args.symbols]
+        print(f'patterns: ', ', '.join(symbols))
 
     # 交易类型
     if args.type:
         print('trade type: ', args.type)
 
     # 查找
-    find_symbols(exchange, args.type, patterns)
+    find_symbols(exchange, args.type, symbols)
