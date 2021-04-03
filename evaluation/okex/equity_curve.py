@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from commons.constants import CANDLE_DATETIME_COLUMN, CANDLE_OPEN_COLUMN, CANDLE_CLOSE_COLUMN, CANDLE_LOW_COLUMN, \
-    CANDLE_HIGH_COLUMN, POSITION_COLUMN
+    CANDLE_HIGH_COLUMN, POSITION_COLUMN, EQUITY_CURVE_COLUMN
 from commons.math import np_floor_to_precision
 from evaluation.slippage import price_with_slippage
 
@@ -66,7 +66,7 @@ class OKExEquityCurve:
         df['profit'] = self._face_value * df['contract_num'] * (df[CANDLE_CLOSE_COLUMN] - df['open_pos_price']) * df[
             POSITION_COLUMN]
         df.loc[close_pos_cond, 'profit'] = self._face_value * df['contract_num'] * (
-                    df['close_pos_price'] - df['open_pos_price']) * df[POSITION_COLUMN]
+                df['close_pos_price'] - df['open_pos_price']) * df[POSITION_COLUMN]
 
         # 账户净值
         df['net_value'] = df['cash'] + df['profit']
@@ -93,14 +93,13 @@ class OKExEquityCurve:
         df['equity_change'] = df['net_value'].pct_change()
         df.loc[open_pos_cond, 'equity_change'] = df.loc[open_pos_cond, 'net_value'] / self._cash - 1  # 开仓日的收益率
         df['equity_change'].fillna(value=0, inplace=True)
-        df['equity_curve'] = (1 + df['equity_change']).cumprod()
+        df[EQUITY_CURVE_COLUMN] = (1 + df['equity_change']).cumprod()
 
         # df.to_parquet('../data/course/equity_curve.parquet')
 
         # 删除不必要的数据
-        df.drop(columns=['next_open', 'contract_num', 'open_pos_price', 'cash', 'close_pos_price', 'close_pos_fee',
-                         'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min', 'margin_ratio', 'blow_up'],
-                inplace=True)
+        df.drop(columns=['next_open', 'cash', 'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min',
+                         'margin_ratio'], inplace=True)
 
         return df
 

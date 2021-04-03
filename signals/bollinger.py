@@ -32,6 +32,7 @@ def boll_trend(df, **kwargs):
     # 合并多空指标
     df = merge_long_short_signal(df, drop_original=True)
 
-    df.drop(columns=['BBU', 'BBM', 'BBL', 'BBB'], inplace=True)
+    if 'bbands_drop_columns' in kwargs and kwargs['bbands_drop_columns'] == '1':
+        df.drop(columns=['BBU', 'BBM', 'BBL', 'BBB'], inplace=True)
 
     return df
