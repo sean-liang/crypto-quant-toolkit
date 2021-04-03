@@ -17,7 +17,7 @@ def run_back_testing(input_file, pipes, config, *, begin, end, offset, tz):
 
     # 载入数据
     df = load_candle_by_ext(input_file)
-    tz = pytz.timezone(args.timezone) if tz else timezone.utc
+    tz = pytz.timezone(args.timezone) if tz else pytz.utc
     candle_date = df[CANDLE_DATETIME_COLUMN].dt.date
     if begin:
         begin = begin_of_day(datetime.strptime(begin, '%Y-%m-%d'), tz=tz)
@@ -46,7 +46,8 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--begin', help='begin date')
     parser.add_argument('-d', '--end', help='end date')
     parser.add_argument('--skip-days', default=0, help='skip days from begin date, default: 0')
-    parser.add_argument('-z', '--timezone', default='UTC', help='timezone, default: UTC')
+    parser.add_argument('-z', '--timezone', default='UTC',
+                        help='begin, end date timezone(not for candle begin time), default: UTC')
     parser.add_argument('-c', '--config', nargs='*', action=ParseKwargs)
     args = parser.parse_args()
 

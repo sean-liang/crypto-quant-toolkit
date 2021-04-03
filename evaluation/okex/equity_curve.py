@@ -3,24 +3,25 @@ import pandas as pd
 from commons.constants import CANDLE_DATETIME_COLUMN, CANDLE_OPEN_COLUMN, CANDLE_CLOSE_COLUMN, CANDLE_LOW_COLUMN, \
     CANDLE_HIGH_COLUMN, POSITION_COLUMN
 from commons.math import np_floor_to_precision
+from evaluation.slippage import price_with_slippage
 
 
-class FuturePnL:
+class OKExEquityCurve:
     """
-    计算合约交易资金曲线
+    计算OKEx合约交易资金曲线
     """
 
-    def __init__(self, pnl_cash=10000, pnl_face_value=0.01, pnl_min_trade_precision=0, pnl_leverage_rate=1,
-                 pnl_slippage_mode='ratio', pnl_slippage=0.001, pnl_commission=0.0002, pnl_min_margin_ratio=0.01,
+    def __init__(self, eval_cash=10000, eval_face_value=0.01, eval_min_trade_precision=0, eval_leverage_rate=1,
+                 eval_slippage_mode='ratio', eval_slippage=0.001, eval_commission=0.0002, eval_min_margin_ratio=0.01,
                  **kwargs):
-        self._cash = float(pnl_cash)
-        self._face_value = float(pnl_face_value)
-        self._min_trade_precision = float(pnl_min_trade_precision)
-        self._leverage_rate = float(pnl_leverage_rate)
-        self._slippage_mode = pnl_slippage_mode
-        self._slippage = float(pnl_slippage)
-        self._commission = float(pnl_commission)
-        self._min_margin_ratio = float(pnl_min_margin_ratio)
+        self._cash = float(eval_cash)
+        self._face_value = float(eval_face_value)
+        self._min_trade_precision = float(eval_min_trade_precision)
+        self._leverage_rate = float(eval_leverage_rate)
+        self._slippage_mode = eval_slippage_mode
+        self._slippage = float(eval_slippage)
+        self._commission = float(eval_commission)
+        self._min_margin_ratio = float(eval_min_margin_ratio)
 
     def calculate(self, df, **kwargs):
         # 找出下根K线的开盘价
@@ -42,7 +43,8 @@ class FuturePnL:
         # 买入合约数 = 固定资金 * 杠杆 / (合约面值 * 开盘价)
         df.loc[open_pos_cond, 'contract_num'] = self._contract_num(df[CANDLE_OPEN_COLUMN])
         # 根据滑点计算实际开仓价格
-        df['open_pos_price'] = self._price_with_slippage(df[CANDLE_OPEN_COLUMN], df[POSITION_COLUMN], open_pos_cond)
+        df['open_pos_price'] = price_with_slippage(self._slippage, self._slippage_mode, df[CANDLE_OPEN_COLUMN],
+                                                   df[POSITION_COLUMN], open_pos_cond)
 
         # 保证金（扣减手续费）
         df['cash'] = self._cash - df['open_pos_price'] * self._face_value * df['contract_num'] * self._commission
@@ -54,7 +56,8 @@ class FuturePnL:
         df.loc[df[POSITION_COLUMN] == 0, cols] = np.NaN
 
         # 根据滑点计算实际平仓价格
-        df.loc[close_pos_cond, 'close_pos_price'] = df['next_open'] * (1 - self._slippage * df[POSITION_COLUMN])
+        df['close_pos_price'] = price_with_slippage(self._slippage, self._slippage_mode, df['next_open'],
+                                                    -1 * df[POSITION_COLUMN], close_pos_cond)
         # 平仓手续费
         df.loc[close_pos_cond, 'close_pos_fee'] = df['close_pos_price'] * self._face_value * df[
             'contract_num'] * self._commission
@@ -63,10 +66,12 @@ class FuturePnL:
         df['profit'] = self._face_value * df['contract_num'] * (df[CANDLE_CLOSE_COLUMN] - df['open_pos_price']) * df[
             POSITION_COLUMN]
         df.loc[close_pos_cond, 'profit'] = self._face_value * df['contract_num'] * (
-                df['close_pos_price'] - df['open_pos_price']) * df[POSITION_COLUMN]
+                    df['close_pos_price'] - df['open_pos_price']) * df[POSITION_COLUMN]
 
         # 账户净值
         df['net_value'] = df['cash'] + df['profit']
+        # 平仓时扣除手续费
+        df.loc[close_pos_cond, 'net_value'] -= df['close_pos_fee']
 
         # 计算爆仓
         df.loc[df[POSITION_COLUMN] == 1, 'price_min'] = df[CANDLE_LOW_COLUMN]
@@ -77,8 +82,6 @@ class FuturePnL:
         df['margin_ratio'] = df['net_value_min'] / (self._face_value * df['contract_num'] * df['price_min'])  # 计算最低保证金率
         df.loc[df['margin_ratio'] <= (self._min_margin_ratio + self._commission), 'blow_up'] = 1  # 计算是否爆仓
 
-        # 平仓时扣除手续费
-        df.loc[close_pos_cond, 'net_value'] -= df['close_pos_fee']
         # 当下一根K线价格突变，在平仓的时候爆仓，要做相应处理。此处处理有省略，不精确。
         df.loc[close_pos_cond & (df['net_value'] < 0), 'blow_up'] = 1
 
@@ -92,10 +95,12 @@ class FuturePnL:
         df['equity_change'].fillna(value=0, inplace=True)
         df['equity_curve'] = (1 + df['equity_change']).cumprod()
 
+        # df.to_parquet('../data/course/equity_curve.parquet')
+
         # 删除不必要的数据
-        df.drop(['next_open', 'contract_num', 'open_pos_price', 'cash', 'close_pos_price', 'close_pos_fee',
-                 'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min', 'margin_ratio', 'blow_up'],
-                axis=1, inplace=True)
+        df.drop(columns=['next_open', 'contract_num', 'open_pos_price', 'cash', 'close_pos_price', 'close_pos_fee',
+                         'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min', 'margin_ratio', 'blow_up'],
+                inplace=True)
 
         return df
 
@@ -105,32 +110,3 @@ class FuturePnL:
         """
         return np_floor_to_precision(self._cash * self._leverage_rate / (self._face_value * series),
                                      self._min_trade_precision)
-
-    def _price_with_slippage(self, price_series, direction_series, cond):
-        """
-        计算滑点
-        """
-        # 根据滑点计算实际开仓价格
-        if self._slippage_mode == 'fixed':
-            # 固定滑点
-            return np.where(cond, fixed_slippage(price_series, self._slippage), np.NaN)
-        elif self._slippage_mode == 'ratio':
-            # 比例滑点
-            return np.where(cond, ratio_slippage(price_series, direction_series, self._slippage), np.NaN)
-        else:
-            # 无滑点
-            return price_series
-
-
-def fixed_slippage(price_series, slippage):
-    """
-    固定滑点
-    """
-    return price_series + slippage
-
-
-def ratio_slippage(price_series, direction_series, slippage):
-    """
-    比例滑点
-    """
-    return price_series * (1 + slippage * direction_series)
