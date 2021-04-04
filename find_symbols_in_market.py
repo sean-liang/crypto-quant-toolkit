@@ -8,8 +8,7 @@ def find_symbols(exchange, trade_type, symbols):
     print('load markets...')
     markets = exchange.load_markets()
     print(f'{len(markets)} symbols found')
-    data = [[v['symbol'], v['type'], v['taker'], v['maker'], v['precision']['amount'], v['precision']['price']] for v in
-            markets.values()]
+    data = [[v['symbol'], v['type'], v['taker'], v['maker'], v['precision']['amount'], v['precision']['price']] for v in markets.values()]
     df = pd.DataFrame(data, columns=columns)
     if trade_type:
         df = df[df['type'].str.contains(trade_type)]

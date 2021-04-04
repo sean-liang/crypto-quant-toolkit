@@ -22,24 +22,25 @@ def run_back_testing(input_file, output_folder, pipes, config, *, begin, end, of
 
     # 载入数据
     df = load_candle_by_ext(input_file)
-    # 安时间过滤
+    # 按时间过滤
     df = filter_candle_dataframe_by_begin_end_offset_datetime(df, begin, end, offset, tz=tz)
 
     # 运行回测
-    return pipeline.process(df)
+    df = pipeline.process(df)
+
+    print(df)
+    return df
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='run back testing')
     parser.add_argument('input', help='history candle file')
-    parser.add_argument('-o', '--output', default='../runs/back_testing/',
-                        help='result output folder, default: ../runs/back_testing/')
+    parser.add_argument('-o', '--output', default='../runs/back_testing/', help='result output folder, default: ../runs/back_testing/')
     parser.add_argument('-p', '--pipes', nargs='+', required=True, help='pipelines')
     parser.add_argument('-b', '--begin', help='begin date')
     parser.add_argument('-d', '--end', help='end date')
     parser.add_argument('--skip-days', default=0, help='skip days from data begin time, default: 0')
-    parser.add_argument('-z', '--timezone', default='UTC',
-                        help='begin, end date timezone(not for candle begin time), default: UTC')
+    parser.add_argument('-z', '--timezone', default='UTC', help='begin, end date timezone(not for candle begin time), default: UTC')
     parser.add_argument('-c', '--config', nargs='*', action=ParseKwargs)
     args = parser.parse_args()
 

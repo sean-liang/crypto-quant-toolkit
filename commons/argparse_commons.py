@@ -45,3 +45,7 @@ def parse_period_arguments(begin, end, periods, *, tz=pytz.utc):
         return parse_period_arguments(None, datetime.now(tz=tz) - timedelta(days=1), periods, tz=tz)
 
     return begin, end
+
+
+def parse_optimize_params(config):
+    pass

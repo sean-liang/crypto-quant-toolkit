@@ -10,12 +10,13 @@ def resample_time_window(df, resample_period='15T', resample_drop_zero_volume='1
                          **kwargs):
     """合成长时间K线"""
     period_df = df.resample(rule=resample_period, on=CANDLE_DATETIME_COLUMN, label='left', closed='left').agg(
-        {CANDLE_OPEN_COLUMN: 'first',
-         CANDLE_HIGH_COLUMN: 'max',
-         CANDLE_LOW_COLUMN: 'min',
-         CANDLE_CLOSE_COLUMN: 'last',
-         CANDLE_VOLUME_COLUMN: 'sum',
-         })
+        {
+            CANDLE_OPEN_COLUMN: 'first',
+            CANDLE_HIGH_COLUMN: 'max',
+            CANDLE_LOW_COLUMN: 'min',
+            CANDLE_CLOSE_COLUMN: 'last',
+            CANDLE_VOLUME_COLUMN: 'sum',
+        })
 
     # 去除一天都没有交易的周期
     if resample_drop_zero_open == '1':

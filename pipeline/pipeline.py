@@ -5,6 +5,7 @@ class Pipeline:
     """
     处理管道
     """
+
     def __init__(self, config, *func_list):
         self._config = config
         self._func_list = func_list if func_list else []
@@ -21,14 +22,16 @@ class Pipeline:
         return df
 
     @staticmethod
-    def build(modules, config):
+    def build(modules, config, *, silent=False):
         """
         构建处理管道
         :param modules: 管道方法列表
         :param config: 命令行传入参数
+        :param silent: 不打印log
         :return: 管道
         """
-        print('pipeline parameters: ', config)
+        if not silent:
+            print('pipeline parameters: ', config)
         pipeline = Pipeline(config)
         for m in modules:
             pipe = importlib.import_module(m)
@@ -37,6 +40,7 @@ class Pipeline:
                 pipeline.extend(ps)
             else:
                 pipeline.append(ps)
-            print(f'load pipe: {pipe.__name__}')
+            if not silent:
+                print(f'load pipe: {pipe.__name__}')
 
         return pipeline

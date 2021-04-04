@@ -30,10 +30,8 @@ def merge_daily_csv_files(root_path, names):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='merge daily candle csv files to single parquet file')
-    parser.add_argument('-r', '--root', default='../data/binance/spot/',
-                        help='root path, default: ../data/binance/spot/')
-    parser.add_argument('-n', '--names', nargs="+",
-                        default=['BTC-USDT_5m', 'ETH-USDT_5m', 'LTC-USDT_5m', 'EOS-USDT_5m'],
+    parser.add_argument('-r', '--root', default='../data/binance/spot/', help='root path, default: ../data/binance/spot/')
+    parser.add_argument('-n', '--names', nargs="+", default=['BTC-USDT_5m', 'ETH-USDT_5m', 'LTC-USDT_5m', 'EOS-USDT_5m'],
                         help='file names, default: BTC-USDT_5m ETH-USDT_5m LTC-USDT_5m EOS-USDT_5m')
     args = parser.parse_args()
 

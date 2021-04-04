@@ -30,8 +30,7 @@ def find_time_series_gaps(file, column, threshold, timezone):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='find gaps in time series data')
     parser.add_argument('file', help='input file')
-    parser.add_argument('-c', '--column', default=CANDLE_DATETIME_COLUMN,
-                        help=f'datetime column name, default: {CANDLE_DATETIME_COLUMN}')
+    parser.add_argument('-c', '--column', default=CANDLE_DATETIME_COLUMN, help=f'datetime column name, default: {CANDLE_DATETIME_COLUMN}')
     parser.add_argument('-t', '--threshold', type=int, default=60, help='gap threshold in minutes, default: 60')
     parser.add_argument('-z', '--timezone', default='UTC', help='output timezone, default: UTC')
     args = parser.parse_args()

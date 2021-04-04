@@ -87,20 +87,15 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='fetch history candle data')
     parser.add_argument('-e', '--exchange', default='binance', help='ccxt supported exchange, default: binance')
-    parser.add_argument('-s', '--symbols', nargs='+', default=default_symbols,
-                        help=f'symbols, default: {" ".join(default_symbols)}')
-    parser.add_argument('-i', '--intervals', nargs='+', default=default_intervals,
-                        help=f'candle intervals, default: {" ".join(default_intervals)}')
+    parser.add_argument('-s', '--symbols', nargs='+', default=default_symbols, help=f'symbols, default: {" ".join(default_symbols)}')
+    parser.add_argument('-i', '--intervals', nargs='+', default=default_intervals, help=f'candle intervals, default: {" ".join(default_intervals)}')
     parser.add_argument('-b', '--begin', help='begin date, default: date of 31 days ago')
     parser.add_argument('-d', '--end', help='end date, default: date of yesterday')
-    parser.add_argument('-p', '--periods', type=int,
-                        help='fetch period in days, works when only one of begin or end is specified')
-    parser.add_argument('-z', '--timezone', default='UTC',
-                        help='begin, end date timezone(not for candle begin time), default: UTC')
+    parser.add_argument('-p', '--periods', type=int, help='fetch period in days, works when only one of begin or end is specified')
+    parser.add_argument('-z', '--timezone', default='UTC', help='begin, end date timezone(not for candle begin time), default: UTC')
     parser.add_argument('-o', '--output', default='../data', help='output folder, default: ../data')
     parser.add_argument('--market', default='spot', help='market, default: spot')
-    parser.add_argument('--items-per-request', type=int, default=1000,
-                        help='candle items per request, default: 1000')
+    parser.add_argument('--items-per-request', type=int, default=1000, help='candle items per request, default: 1000')
     parser.add_argument('--sleep', type=float, default=1, help='seconds to sleep between requests, default: 1')
     parser.add_argument('--match-symbols', action='store_true', help='extract symbols by matching market symbols')
     args = parser.parse_args()
@@ -130,5 +125,4 @@ if __name__ == '__main__':
     print(f'output folder: {output_folder}')
 
     # 开始抓取
-    fetch_hist_ohlc(exchange, symbols, candle_intervals, begin, end, output_folder, market=args.market,
-                    npr=args.items_per_request, sleep=args.sleep, tz=tz)
+    fetch_hist_ohlc(exchange, symbols, candle_intervals, begin, end, output_folder, market=args.market, npr=args.items_per_request, sleep=args.sleep, tz=tz)

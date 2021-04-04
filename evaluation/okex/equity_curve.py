@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from commons.constants import CANDLE_DATETIME_COLUMN, CANDLE_OPEN_COLUMN, CANDLE_CLOSE_COLUMN, CANDLE_LOW_COLUMN, \
-    CANDLE_HIGH_COLUMN, POSITION_COLUMN, EQUITY_CURVE_COLUMN
+from commons.constants import CANDLE_DATETIME_COLUMN, CANDLE_OPEN_COLUMN, CANDLE_CLOSE_COLUMN, CANDLE_LOW_COLUMN, CANDLE_HIGH_COLUMN, POSITION_COLUMN, \
+    EQUITY_CURVE_COLUMN
 from commons.math import np_floor_to_precision
 from evaluation.slippage import price_with_slippage
 
@@ -11,9 +11,8 @@ class OKExEquityCurve:
     计算OKEx合约交易资金曲线
     """
 
-    def __init__(self, eval_cash=10000, eval_face_value=0.01, eval_min_trade_precision=0, eval_leverage_rate=1,
-                 eval_slippage_mode='ratio', eval_slippage=0.001, eval_commission=0.0002, eval_min_margin_ratio=0.01,
-                 **kwargs):
+    def __init__(self, eval_cash=10000, eval_face_value=0.01, eval_min_trade_precision=0, eval_leverage_rate=1, eval_slippage_mode='ratio', eval_slippage=0.001,
+                 eval_commission=0.0002, eval_min_margin_ratio=0.01, **kwargs):
         self._cash = float(eval_cash)
         self._face_value = float(eval_face_value)
         self._min_trade_precision = float(eval_min_trade_precision)
@@ -43,8 +42,7 @@ class OKExEquityCurve:
         # 买入合约数 = 固定资金 * 杠杆 / (合约面值 * 开盘价)
         df.loc[open_pos_cond, 'contract_num'] = self._contract_num(df[CANDLE_OPEN_COLUMN])
         # 根据滑点计算实际开仓价格
-        df['open_pos_price'] = price_with_slippage(self._slippage, self._slippage_mode, df[CANDLE_OPEN_COLUMN],
-                                                   df[POSITION_COLUMN], open_pos_cond)
+        df['open_pos_price'] = price_with_slippage(self._slippage, self._slippage_mode, df[CANDLE_OPEN_COLUMN], df[POSITION_COLUMN], open_pos_cond)
 
         # 保证金（扣减手续费）
         df['cash'] = self._cash - df['open_pos_price'] * self._face_value * df['contract_num'] * self._commission
@@ -56,17 +54,13 @@ class OKExEquityCurve:
         df.loc[df[POSITION_COLUMN] == 0, cols] = np.NaN
 
         # 根据滑点计算实际平仓价格
-        df['close_pos_price'] = price_with_slippage(self._slippage, self._slippage_mode, df['next_open'],
-                                                    -1 * df[POSITION_COLUMN], close_pos_cond)
+        df['close_pos_price'] = price_with_slippage(self._slippage, self._slippage_mode, df['next_open'], -1 * df[POSITION_COLUMN], close_pos_cond)
         # 平仓手续费
-        df.loc[close_pos_cond, 'close_pos_fee'] = df['close_pos_price'] * self._face_value * df[
-            'contract_num'] * self._commission
+        df.loc[close_pos_cond, 'close_pos_fee'] = df['close_pos_price'] * self._face_value * df['contract_num'] * self._commission
 
         # 持仓盈亏
-        df['profit'] = self._face_value * df['contract_num'] * (df[CANDLE_CLOSE_COLUMN] - df['open_pos_price']) * df[
-            POSITION_COLUMN]
-        df.loc[close_pos_cond, 'profit'] = self._face_value * df['contract_num'] * (
-                df['close_pos_price'] - df['open_pos_price']) * df[POSITION_COLUMN]
+        df['profit'] = self._face_value * df['contract_num'] * (df[CANDLE_CLOSE_COLUMN] - df['open_pos_price']) * df[POSITION_COLUMN]
+        df.loc[close_pos_cond, 'profit'] = self._face_value * df['contract_num'] * (df['close_pos_price'] - df['open_pos_price']) * df[POSITION_COLUMN]
 
         # 账户净值
         df['net_value'] = df['cash'] + df['profit']
@@ -76,8 +70,7 @@ class OKExEquityCurve:
         # 计算爆仓
         df.loc[df[POSITION_COLUMN] == 1, 'price_min'] = df[CANDLE_LOW_COLUMN]
         df.loc[df[POSITION_COLUMN] == -1, 'price_min'] = df[CANDLE_HIGH_COLUMN]
-        df['profit_min'] = self._face_value * df['contract_num'] * (df['price_min'] - df['open_pos_price']) * df[
-            POSITION_COLUMN]
+        df['profit_min'] = self._face_value * df['contract_num'] * (df['price_min'] - df['open_pos_price']) * df[POSITION_COLUMN]
         df['net_value_min'] = df['cash'] + df['profit_min']  # 账户净值最小值
         df['margin_ratio'] = df['net_value_min'] / (self._face_value * df['contract_num'] * df['price_min'])  # 计算最低保证金率
         df.loc[df['margin_ratio'] <= (self._min_margin_ratio + self._commission), 'blow_up'] = 1  # 计算是否爆仓
@@ -98,8 +91,7 @@ class OKExEquityCurve:
         # df.to_parquet('../data/course/equity_curve.parquet')
 
         # 删除不必要的数据
-        df.drop(columns=['next_open', 'cash', 'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min',
-                         'margin_ratio'], inplace=True)
+        df.drop(columns=['next_open', 'cash', 'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min', 'margin_ratio'], inplace=True)
 
         return df
 
@@ -107,5 +99,4 @@ class OKExEquityCurve:
         """
         计算合约数
         """
-        return np_floor_to_precision(self._cash * self._leverage_rate / (self._face_value * series),
-                                     self._min_trade_precision)
+        return np_floor_to_precision(self._cash * self._leverage_rate / (self._face_value * series), self._min_trade_precision)

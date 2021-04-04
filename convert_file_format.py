@@ -13,8 +13,7 @@ def convert_format(input_path, output_path, in_params, out_params):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='convert dataframe file format, supported formats: .csv, .h5, .parquet')
+    parser = argparse.ArgumentParser(description='convert dataframe file format, supported formats: .csv, .h5, .parquet')
     parser.add_argument('input', help='input file')
     parser.add_argument('output', help='output file')
     parser.add_argument('--input-config', nargs='*', action=ParseKwargs)

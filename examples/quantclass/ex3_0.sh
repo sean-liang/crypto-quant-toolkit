@@ -7,6 +7,6 @@ python run_back_testing.py \
      bbands_period=400 bbands_std=2 bbands_ma=sma \
      data_skip_days=10 \
      dtd_hour=16 dtd_minute=0 \
-     eval_cash=1000000 eval_face_value=0.01 eval_min_trade_precision=0 eval_commission=0.0005 \
+     eval_cash=100000 eval_face_value=0.01 eval_min_trade_precision=0 eval_commission=0.0005 \
      eval_slippage_mode=ratio eval_slippage=0.001 \
      eval_leverage_rate=3 eval_min_margin_ratio=0.01
