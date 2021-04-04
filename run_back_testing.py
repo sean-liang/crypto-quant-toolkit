@@ -6,6 +6,7 @@ from commons.io import load_candle_by_ext
 from commons.datetime_utils import str_to_timezone
 from commons.dataframe_utils import filter_candle_dataframe_by_begin_end_offset_datetime
 from commons.argparse_commons import ParseKwargs
+from commons.constants import EQUITY_CURVE_COLUMN
 from pipeline.pipeline import Pipeline
 
 
@@ -15,7 +16,7 @@ def run_back_testing(input_file, output_folder, pipes, config, *, begin, end, of
     output_folder.mkdir(parents=True, exist_ok=True)
 
     # 时区
-    config['tz'] = tz = str_to_timezone(args.timezone)
+    config['tz'] = tz = str_to_timezone(tz)
 
     # 载入策略
     pipeline = Pipeline.build(pipes, config)
@@ -28,7 +29,8 @@ def run_back_testing(input_file, output_folder, pipes, config, *, begin, end, of
     # 运行回测
     df = pipeline.process(df)
 
-    print(df)
+    print(f'final equity: ', df.iloc[-1][EQUITY_CURVE_COLUMN])
+
     return df
 
 
@@ -45,7 +47,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     start_time = timeit.default_timer()
-    run_back_testing(args.input, args.output, args.pipes, args.config, begin=args.begin, end=args.end,
+    df = run_back_testing(args.input, args.output, args.pipes, args.config, begin=args.begin, end=args.end,
                      offset=args.skip_days, tz=args.timezone)
     end_time = timeit.default_timer()
     elapse = end_time - start_time

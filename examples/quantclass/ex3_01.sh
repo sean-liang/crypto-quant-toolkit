@@ -1,6 +1,6 @@
 # 少年意气篇，使用币安现货数据对OKEX期货进行回测（非作业）
 python run_back_testing.py \
-  ../data/course/BTC-USDT_5m.parquet \
+  ../data/course/BTC-USDT_5m.h5 \
   -b '2017-01-01' \
   -p data.resample_time_window strategy.boll_trend evaluation.okex.future evaluation.report\
   -c resample_period=15T resample_drop_zero_volume=1 resample_drop_zero_volume=1 \

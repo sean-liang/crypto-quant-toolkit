@@ -17,11 +17,8 @@ def load_by_ext(path, **kwargs):
         return pd.read_csv(path, **kwargs)
     elif ext == 'h5':
         if 'key' not in kwargs:
-            store = pd.HDFStore(path)
-            print('specify hdf key from this list: ', store.keys())
-            store.close()
-        else:
-            return pd.read_hdf(path, **kwargs)
+            kwargs['key'] = 'df'
+        return pd.read_hdf(path, **kwargs)
     elif ext in ['par', 'parquet']:
         return pd.read_parquet(path, **kwargs)
 
@@ -42,10 +39,11 @@ def save_by_ext(path, df: pd.DataFrame, **kwargs):
     if isinstance(path, str):
         path = Path(path)
     ext = extension(path)
-
-    if ext is 'csv':
+    if ext == 'csv':
         df.to_csv(path, **kwargs)
-    elif ext is 'h5':
+    elif ext == 'h5':
+        if 'key' not in kwargs:
+            kwargs['key'] = 'df'
         df.to_hdf(path, **kwargs)
     elif ext in ['par', 'parquet']:
         df.to_parquet(path, **kwargs)

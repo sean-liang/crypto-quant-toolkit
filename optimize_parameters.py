@@ -8,6 +8,7 @@ from commons.datetime_utils import str_to_timezone
 from commons.dataframe_utils import filter_candle_dataframe_by_begin_end_offset_datetime
 from commons.argparse_commons import ParseKwargs
 from optim.optimizer import Optimizer
+from run_back_testing import run_back_testing
 
 
 def optimize(input_file, output_folder, pipes, method, size_pop, max_iter, config, *, begin, end, offset, tz):
@@ -25,18 +26,23 @@ def optimize(input_file, output_folder, pipes, method, size_pop, max_iter, confi
 
     # 优化参数
     optimizer = Optimizer(method, size_pop, max_iter, config)
-    best_x, best_y, hist = optimizer.run(df, pipes, run_mode='multiprocessing')
+    best_x, best_y, hist, conf = optimizer.run(df, ['data.copy_dataframe', *pipes], run_mode='multiprocessing')
     print(f'parameters: {best_x}, {EQUITY_CURVE_COLUMN}: {best_y}')
+    conf_arr = [f'{k}={conf[k]}' for k in conf]
+    print('config: ', ' '.join(conf_arr))
 
     result_file = output_folder / 'result.csv'
     print('save result to: ', result_file)
     hist.to_csv(result_file)
 
+    print('run back testing...')
+    run_back_testing(input_file, output_folder.__str__(), [*pipes, 'evaluation.report'], conf, begin=begin, end=end, offset=offset, tz=tz.zone)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='optimize parameters')
     parser.add_argument('input', help='history candle file')
-    parser.add_argument('-m', '--method', default='DE', help='method, support: GA, PSO, DE, default: DE')
+    parser.add_argument('-m', '--method', default='GA', help='method, support: GA, PSO, DE, default: GA')
     parser.add_argument('-s', '--population', type=int, default=50, help='population, default: 50')
     parser.add_argument('-i', '--max-iteration', type=int, default=100, help='max iteration, default: 100')
     parser.add_argument('-o', '--output', default='../runs/optimize/',
