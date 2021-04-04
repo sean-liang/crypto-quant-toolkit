@@ -25,7 +25,7 @@ def optimize(input_file, output_folder, pipes, method, size_pop, max_iter, confi
     optimizer = Optimizer(method, size_pop, max_iter, config)
     opt_pipes = ['data.copy_dataframe', *pipes]
     best_x, best_y, hist, conf = optimizer.run(df, opt_pipes, run_mode='multiprocessing')
-    print(f'parameters: {best_x}, {EQUITY_CURVE_COLUMN}: {best_y}')
+    print(f'best parameters: {best_x}, best {EQUITY_CURVE_COLUMN}: {best_y}')
     conf_arr = [f'{k}={conf[k]}' for k in conf]
     print('config: ', ' '.join(conf_arr))
 

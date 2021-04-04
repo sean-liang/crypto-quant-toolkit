@@ -43,7 +43,7 @@ class Optimizer:
         hist_array = np.hstack((gen_best_x, -1 * gen_best_y))
         hist_df = pd.DataFrame(hist_array, columns=[*self._params.variant_names, EQUITY_CURVE_COLUMN])
         hist_df.sort_values(EQUITY_CURVE_COLUMN, ignore_index=True, inplace=True)
-        return self._params.true_values(best_x)[0], -1 * best_y, hist_df, self._params.generate_config(best_x)[0]
+        return self._params.true_values([best_x])[0], -1 * best_y, hist_df, self._params.generate_config(best_x)[0]
 
 
 class Parameters:
