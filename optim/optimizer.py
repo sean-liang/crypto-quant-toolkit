@@ -43,7 +43,7 @@ class Optimizer:
         hist_array = np.hstack((gen_best_x, -1 * gen_best_y))
         hist_df = pd.DataFrame(hist_array, columns=[*self._params.variant_names, EQUITY_CURVE_COLUMN])
         hist_df.sort_values(EQUITY_CURVE_COLUMN, ignore_index=True, inplace=True)
-        return best_x, -1 * best_y, hist_df, self._params.generate_config(best_x)[0]
+        return self._params.true_values(best_x)[0], -1 * best_y, hist_df, self._params.generate_config(best_x)[0]
 
 
 class Parameters:
@@ -71,6 +71,15 @@ class Parameters:
                 lower_bound.append(begin)
                 upper_bound.append(end)
                 precision.append(step)
+            elif val.startswith('{') and val.endswith('}'):
+                values = [v.strip() for v in val[1:-1].split(',')]
+                begin = 0
+                end = len(values) - 1
+                step = 1
+                variants.append({'key': key, 'type': 'option', 'begin': begin, 'end': end, 'step': step, 'values': values})
+                lower_bound.append(begin)
+                upper_bound.append(end)
+                precision.append(step)
 
         return variants, lower_bound, upper_bound, precision
 
@@ -83,6 +92,9 @@ class Parameters:
                 if var_def['type'] == 'range':
                     precision = var_def['step']
                     result.append(auto_round(value, precision))
+                elif var_def['type'] == 'option':
+                    option = var_def['values'][int(value)]
+                    result.append(option)
                 else:
                     result.append(value)
             result_list.append(result)
@@ -97,6 +109,10 @@ class Parameters:
                 step = self.variants[i]['step']
                 x = conf[key] = auto_round(v, step)
                 x_list.append(x)
+            elif self.variants[i]['type'] == 'option':
+                val = self.variants[i]['values'][int(v)]
+                conf[key] = val
+                x_list.append(val)
         return conf, x_list
 
 

@@ -10,9 +10,13 @@ from commons.constants import EQUITY_CURVE_COLUMN
 from pipeline.pipeline import Pipeline
 
 
-def run_back_testing(input_file, output_folder, pipes, config, *, begin, end, offset, tz):
+def run_back_testing(input_file, output_folder, pipes, config, *, begin, end, offset, tz, output_path=None):
     # 输出路径
-    config['output_folder'] = output_folder = Path(output_folder) / datetime.now().strftime('%Y%m%d_%H%M%S')
+    if not output_path:
+        output_folder = Path(output_folder) / datetime.now().strftime('%Y%m%d_%H%M%S')
+    else:
+        output_folder = Path(output_path)
+    config['output_folder'] = output_folder
     output_folder.mkdir(parents=True, exist_ok=True)
 
     # 时区
@@ -47,8 +51,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     start_time = timeit.default_timer()
-    df = run_back_testing(args.input, args.output, args.pipes, args.config, begin=args.begin, end=args.end,
-                     offset=args.skip_days, tz=args.timezone)
+    run_back_testing(args.input, args.output, args.pipes, args.config, begin=args.begin, end=args.end,
+                          offset=args.skip_days, tz=args.timezone)
     end_time = timeit.default_timer()
     elapse = end_time - start_time
     print(f'done, takes {elapse:.2f}s')
