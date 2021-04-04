@@ -36,7 +36,7 @@ def optimize(input_file, output_folder, pipes, method, size_pop, max_iter, confi
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='optimize parameters')
     parser.add_argument('input', help='history candle file')
-    parser.add_argument('-m', '--method', default='GA', help='method, support: GA, PSO, DE, default: GA')
+    parser.add_argument('-m', '--method', default='DE', help='method, support: GA, PSO, DE, default: DE')
     parser.add_argument('-s', '--population', type=int, default=50, help='population, default: 50')
     parser.add_argument('-i', '--max-iteration', type=int, default=100, help='max iteration, default: 100')
     parser.add_argument('-o', '--output', default='../runs/optimize/',
@@ -54,5 +54,5 @@ if __name__ == '__main__':
     optimize(args.input, args.output, args.pipes, args.method, args.population, args.max_iteration, args.config, begin=args.begin, end=args.end,
              offset=args.skip_days, tz=str_to_timezone(args.timezone))
     end_time = timeit.default_timer()
-    elapse = int((end_time - start_time) / 60 / 60)
-    print(f'done, takes {elapse:.2f} hours')
+    elapse = (end_time - start_time) / 60 / 60
+    print(f'done, takes {elapse:.4f} hours')
