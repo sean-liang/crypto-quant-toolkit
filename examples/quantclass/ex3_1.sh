@@ -1,7 +1,7 @@
 # 少年意气篇，优化策略参数（使用遗传算法）
 python optimize_parameters.py \
   ../data/course/BTC-USDT_15m.parquet \
-  -m 'GA' -s 50 -i 2  \
+  -m 'GA' -s 50 -i 200  \
   -b '2017-01-01' \
   -p data.copy_dataframe strategy.boll_trend evaluation.okex.future \
   -c bbands_period='[10, 1000, 10]' bbands_std='[0.2, 6, 0.2]' bbands_ma='ma' \
