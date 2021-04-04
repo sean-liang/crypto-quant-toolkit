@@ -1,8 +1,12 @@
 numpy
+ta-lib
 pandas
 pandas_ta
-ta-lib
+scipy
+scikit-opt
 ccxt
 tqdm
 requests
 pyarrow
+tables
+matplotlib

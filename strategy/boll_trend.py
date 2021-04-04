@@ -1,13 +1,17 @@
+from functools import partial
 import pandas_ta as ta
 from commons.constants import CANDLE_CLOSE_COLUMN
 from pipeline.pandas_ta_helper import WrapPandasTa
-from pipeline.pandas_helper import dropna
+from pipeline.pandas_helper import drop_na
+from indicator.volatility import bbands
 from signals.bollinger import boll_trend
 
 
 def build(params):
-    bbands = WrapPandasTa(ta.bbands, columns=[CANDLE_CLOSE_COLUMN], strip_column=True,
-                          length=int(params['bbands_period']), std=float(params['bbands_std']),
-                          mamode=params['bbands_ma']).func
-
-    return bbands, dropna, boll_trend
+    """
+    布林线趋势策略: 1.计算布林带，2.丢弃空值, 3.计算多空信号
+    """
+    # bbands = WrapPandasTa(ta.bbands, columns=[CANDLE_CLOSE_COLUMN], strip_column=True,
+    #                       length=int(params['bbands_period']), std=float(params['bbands_std']),
+    #                       mamode=params['bbands_ma']).func
+    return bbands, drop_na, boll_trend
