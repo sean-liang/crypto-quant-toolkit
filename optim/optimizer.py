@@ -14,6 +14,7 @@ class Optimizer:
         self._method = method
         self._params = Parameters(config)
         self._engine_builder = self._build_engine(method, size_pop, max_iter, self._params)
+        self._tracker = ProgressTracker(size_pop, max_iter)
 
     def _build_engine(self, method, size_pop, max_iter, params):
         p = params
@@ -28,7 +29,7 @@ class Optimizer:
         return ga
 
     def run(self, df, pipes, *, run_mode='multiprocessing'):
-        wrap_func = partial(optimize_func, df=df, pipes=pipes, params=self._params)
+        wrap_func = partial(optimize_func, df=df, pipes=pipes, params=self._params, tracker=self._tracker)
         set_run_mode(wrap_func, run_mode)
         engine = self._engine_builder(wrap_func)
         best_x, best_y = engine.run()
@@ -116,10 +117,22 @@ class Parameters:
         return conf, x_list
 
 
-def optimize_func(x, df, pipes, params):
+class ProgressTracker:
+    _shared_stats = {'total': 0, 'progress': 0}
+
+    def __init__(self, pop, max_iter):
+        self.__dict__ = self._shared_stats
+        self.total = max_iter
+
+    def next(self):
+        self.progress += 1
+        return self.progress
+
+
+def optimize_func(x, df, pipes, params, tracker):
     config, round_x = params.generate_config(x)
     pipeline = Pipeline.build(pipes, config, silent=True)
     df = pipeline.process(df)
     y = df.iloc[-1][EQUITY_CURVE_COLUMN]
-    print(f'parameters: {round_x}, {EQUITY_CURVE_COLUMN}: {y}')
+    print(f'[{tracker.next()}/{tracker.total}] parameters: {round_x}, {EQUITY_CURVE_COLUMN}: {y}')
     return -1 * y

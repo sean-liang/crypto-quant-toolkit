@@ -3,6 +3,7 @@ ta-lib
 pandas
 pandas_ta
 scipy
+scikit-learn
 scikit-opt
 ccxt
 tqdm
@@ -10,3 +11,4 @@ requests
 pyarrow
 tables
 matplotlib
+seaborn
