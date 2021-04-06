@@ -11,6 +11,8 @@ def _group_trade(df, open_cond, col='start_time'):
     """
     df['start_time'] = np.where(open_cond, df[CANDLE_DATETIME_COLUMN], pd.NaT)
     df['start_time'].fillna(method='ffill', inplace=True)
+    df['start_time'] = np.where(df[POSITION_COLUMN] == 0, pd.NaT, df['start_time'])
+    df['start_time'] = pd.to_datetime(df['start_time'])
 
 
 def _contract_number(price, cash, leverage_rate, face_value, min_trade_precision):

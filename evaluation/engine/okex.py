@@ -34,7 +34,5 @@ def future_equity_curve(df, cash=10000, face_value=0.01, min_trade_precision=0, 
     _blow_up(df, close_cond, face_value, min_margin_ratio, commission, col='blow_up')
     # 计算资金曲线
     df[EQUITY_CURVE_COLUMN] = _equity_curve(df['net_value'], open_cond, cash)
-    # 删除不必要的数据
-    df.drop(columns=['next_open', 'margin', 'net_value'], inplace=True)
 
     return df

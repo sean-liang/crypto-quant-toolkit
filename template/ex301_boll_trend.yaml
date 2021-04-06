@@ -1,3 +1,4 @@
+# 少年意气篇，使用币安现货数据对OKEX期货进行回测（非作业）
 actions:
   - method: data.candle.resample_candle_time_window
     params:
@@ -23,7 +24,7 @@ actions:
       days: 10
   - method: evaluation.engine.okex.future_equity_curve
     params:
-      cash: 100000
+      cash: 1000000
       face_value: 0.01
       min_trade_precision: 0
       commission: 0.0005

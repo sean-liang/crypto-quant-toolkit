@@ -3,7 +3,7 @@ from commons.constants import CANDLE_COLUMNS, CANDLE_DATETIME_COLUMN, CANDLE_OPE
     CANDLE_VOLUME_COLUMN, POSITION_COLUMN
 
 
-def resample_candle_time_window(df, period='15T', drop_zero_volume='1', drop_zero_open='1'):
+def resample_candle_time_window(df, period, drop_zero_volume=True, drop_zero_open=True):
     """合成长时间K线"""
     period_df = df.resample(rule=period, on=CANDLE_DATETIME_COLUMN, label='left', closed='left').agg(
         {
@@ -15,9 +15,9 @@ def resample_candle_time_window(df, period='15T', drop_zero_volume='1', drop_zer
         })
 
     # 去除没有交易的K线
-    if drop_zero_open == '1':
+    if drop_zero_open:
         period_df.dropna(subset=[CANDLE_OPEN_COLUMN], inplace=True)
-    if drop_zero_volume == '1':
+    if drop_zero_volume:
         period_df = period_df[period_df[CANDLE_VOLUME_COLUMN] > 0]
 
     period_df.reset_index(inplace=True)
