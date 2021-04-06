@@ -7,7 +7,7 @@ import yaml
 class VariantParameters:
 
     def __init__(self, template, variables):
-        self._template_context = template.get('context')
+        self._template_context = template.get('context', {})
         self._template_actions = template['actions']
         self._variables, self._total = _parse_variables(self._template_actions, variables)
 

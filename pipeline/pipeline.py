@@ -6,7 +6,6 @@ from commons.logging import log
 
 class Pipeline:
     """处理管道"""
-
     def __init__(self, context={}):
         self.context = context
         self.actions = []
@@ -16,9 +15,9 @@ class Pipeline:
         method = getattr(module, method_name)
         params = params
         func = partial(method, **params)
-        func.__dict__['pipeline_context'] = self.context
+        func.pipeline_context = method.pipeline_context = self.context
         if scopes:
-            func.__dict__['pipeline_scopes'] = scopes
+            func.pipeline_scopes = method.pipeline_scopes = scopes
         self.actions.append(func)
 
     def process(self, df, scopes=None):
