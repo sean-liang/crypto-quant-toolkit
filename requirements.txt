@@ -1,3 +1,4 @@
+pyyaml
 numpy
 ta-lib
 pandas
