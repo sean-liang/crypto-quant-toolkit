@@ -1,0 +1,22 @@
+# 少年意气篇，对布林趋势策略进行参数优化（非作业）
+context:
+  a: test
+actions:
+  - method: optim.grid_optimizer.optimize
+    params:
+      target_template: template/ex301_boll_trend_strategy.yaml
+      column: 'equity_curve'
+      target: 'maximize'
+      variables:
+        - method: indicator.volatility.bbands
+          params:
+            period: [ 20, 1000, 20 ]
+            width: [ 0.5, 5, 0.5 ]
+        - method: evaluation.engine.okex.future_equity_curve
+          params:
+            leverage_rate: [ 1, 3, 1 ]
+  - method: data.pandas.with_dataframe
+    scopes: [ backtesting ]
+    params:
+      method: to_parquet
+      path: ../runs/optimize/ex311_parameters.parquet

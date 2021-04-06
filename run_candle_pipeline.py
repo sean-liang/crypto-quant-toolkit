@@ -9,9 +9,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='run back testing')
     parser.add_argument('pipeline', help='pipeline template file')
     parser.add_argument('input', help='history candle file')
+    parser.add_argument('-s', '--scopes', nargs='+', help='pipeline scopes')
     parser.add_argument('-b', '--begin', help='begin date')
     parser.add_argument('-d', '--end', help='end date')
-    parser.add_argument('--skip-days', default=0, help='skip days from data begin time, default: 0')
+    parser.add_argument('-k', '--skip-days', default=0, help='skip days from data begin time, default: 0')
     parser.add_argument('-z', '--timezone', default='UTC', help='begin, end date timezone(not for candle begin time), default: UTC')
     args = parser.parse_args()
 
@@ -25,7 +26,7 @@ if __name__ == '__main__':
 
     # 运行回测
     start_time = timeit.default_timer()
-    res = pipeline.process(data)
+    res = pipeline.process(data, scopes=set(args.scopes) if args.scopes else None)
     end_time = timeit.default_timer()
     elapse = end_time - start_time
     print(res)

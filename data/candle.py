@@ -31,7 +31,8 @@ def skip_days(df, days):
     忽略n天的k线
     """
     t = df.iloc[0][CANDLE_DATETIME_COLUMN] + timedelta(days=days)
-    return df[df[CANDLE_DATETIME_COLUMN] > t]
+    df.drop(df[df[CANDLE_DATETIME_COLUMN] <= t].index, inplace=True)
+    return df
 
 
 def add_next_open(df, col='next_open'):

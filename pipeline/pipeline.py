@@ -11,17 +11,24 @@ class Pipeline:
         self.context = context
         self.actions = []
 
-    def load(self, module_name, method_name, params={}):
+    def load(self, module_name, method_name, scopes, params={}):
         module = importlib.import_module(module_name)
         method = getattr(module, method_name)
         params = params
         func = partial(method, **params)
-        func.__dict__['_context'] = self.context
+        func.__dict__['pipeline_context'] = self.context
+        if scopes:
+            func.__dict__['pipeline_scopes'] = scopes
         self.actions.append(func)
 
-    def process(self, df):
+    def process(self, df, scopes=None):
+        if scopes and not isinstance(scopes, (set, list, tuple)):
+            scopes = [scopes]
+        if scopes and not isinstance(scopes, set):
+            scopes = set(scopes)
         for action in self.actions:
-            df = action(df)
+            if not scopes or (scopes and action.pipeline_scopes and set.intersection(scopes, action.pipeline_scopes)):
+                df = action(df)
         return df
 
     @staticmethod
@@ -29,18 +36,18 @@ class Pipeline:
         """从yaml配置文件构建管道"""
         with open(path, 'r') as stream:
             config = yaml.load(stream, Loader=yaml.CLoader)
-            if verbose:
-                log.info(f'load pipeline template: {config}')
-        return Pipeline.build(config, verbose=verbose)
+        return Pipeline.build(config['actions'], config.get('context', {}), verbose=verbose)
 
     @staticmethod
-    def build(template, *, verbose=False):
+    def build(actions, context={}, *, verbose=False):
         """从配置字典构建管道"""
-        pipeline = Pipeline(template.get('context', {}))
-        for conf in template['actions']:
+        pipeline = Pipeline(context)
+        for conf in actions:
             module_name, method_name = conf['method'].rsplit('.', 1)
+            scopes = conf.get('scopes', None)
+            scopes = set([scopes] if isinstance(scopes, str) else scopes) if scopes else None
             params = conf.get('params', {})
-            pipeline.load(module_name, method_name, params)
+            pipeline.load(module_name, method_name, scopes, params)
             if verbose:
-                log.info(f'Load {module_name}.{method_name} <- {params}')
+                log.info(f'load action: {module_name}.{method_name}, scopes: {scopes}, params: {params}')
         return pipeline
