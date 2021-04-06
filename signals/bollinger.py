@@ -3,7 +3,7 @@ from signals.commons import merge_long_short_signal
 from commons.constants import CANDLE_CLOSE_COLUMN
 
 
-def boll_trend(df, **kwargs):
+def boll_trend(df):
     """
     布林线趋势信号，破上轨做多，下穿均线平多，破下轨做空，上穿均线平多
     """
@@ -31,10 +31,5 @@ def boll_trend(df, **kwargs):
 
     # 合并多空指标
     df = merge_long_short_signal(df, fill_na=True, drop_original=True)
-
-    # df.to_parquet('../data/course/signals.parquet')
-
-    if 'bbands_drop_columns' in kwargs and kwargs['bbands_drop_columns'] == '1':
-        df.drop(columns=['BBU', 'BBM', 'BBL', 'BBB'], inplace=True)
 
     return df

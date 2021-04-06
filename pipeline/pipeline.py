@@ -1,46 +1,53 @@
 import importlib
+from functools import partial
+import yaml
+from commons.logging import log
 
 
 class Pipeline:
-    """
-    处理管道
-    """
+    """处理管道"""
 
-    def __init__(self, config, *func_list):
-        self._config = config
-        self._func_list = func_list if func_list else []
+    def __init__(self, context={}):
+        self.context = context
+        self.actions = []
 
-    def extend(self, func_list):
-        self._func_list.extend(func_list)
+    def load(self, module_name, method_name, scopes, params={}):
+        module = importlib.import_module(module_name)
+        method = getattr(module, method_name)
+        params = params
+        func = partial(method, **params)
+        func.__dict__['pipeline_context'] = self.context
+        if scopes:
+            func.__dict__['pipeline_scopes'] = scopes
+        self.actions.append(func)
 
-    def append(self, func):
-        self._func_list.append(func)
-
-    def process(self, df):
-        for func in self._func_list:
-            df = func(df, **self._config)
+    def process(self, df, scopes=None):
+        if scopes and not isinstance(scopes, (set, list, tuple)):
+            scopes = [scopes]
+        if scopes and not isinstance(scopes, set):
+            scopes = set(scopes)
+        for action in self.actions:
+            if not scopes or (scopes and action.pipeline_scopes and set.intersection(scopes, action.pipeline_scopes)):
+                df = action(df)
         return df
 
     @staticmethod
-    def build(modules, config, *, silent=False):
-        """
-        构建处理管道
-        :param modules: 管道方法列表
-        :param config: 命令行传入参数
-        :param silent: 不打印log
-        :return: 管道
-        """
-        if not silent:
-            print('pipeline parameters: ', config)
-        pipeline = Pipeline(config)
-        for m in modules:
-            pipe = importlib.import_module(m)
-            ps = pipe.build(config)
-            if isinstance(ps, (list, tuple)):
-                pipeline.extend(ps)
-            else:
-                pipeline.append(ps)
-            if not silent:
-                print(f'load pipe: {pipe.__name__}')
+    def build_from_template(path, *, verbose=False):
+        """从yaml配置文件构建管道"""
+        with open(path, 'r') as stream:
+            config = yaml.load(stream, Loader=yaml.CLoader)
+        return Pipeline.build(config['actions'], config.get('context', {}), verbose=verbose)
 
+    @staticmethod
+    def build(actions, context={}, *, verbose=False):
+        """从配置字典构建管道"""
+        pipeline = Pipeline(context)
+        for conf in actions:
+            module_name, method_name = conf['method'].rsplit('.', 1)
+            scopes = conf.get('scopes', None)
+            scopes = set([scopes] if isinstance(scopes, str) else scopes) if scopes else None
+            params = conf.get('params', {})
+            pipeline.load(module_name, method_name, scopes, params)
+            if verbose:
+                log.info(f'load action: {module_name}.{method_name}, scopes: {scopes}, params: {params}')
         return pipeline
