@@ -1,19 +1,18 @@
+from decimal import Decimal
 import numpy as np
-import math
 
 
-def np_floor_to_precision(data, precision=0):
+def floor_to_precision(data, decimal_place=0):
     """
     向下取整到指定位数
     """
-    return np.floor(data * (10 ** precision)) / (10 ** precision)
+    return np.floor(data * (10 ** decimal_place)) / (10 ** decimal_place)
 
 
-def auto_round(data, precision, *, min_precision=2):
-    """
-    四舍五入
-    """
-    if isinstance(data, np.ndarray):
-        return np.round(data) if precision >= 1 else np.round(data * (10 ** min_precision)) / (10 ** min_precision)
-    elif isinstance(data, float):
-        return round(data) if precision >= 1 else round(data * (10 ** min_precision)) / (10 ** min_precision)
+def number_exponent(num):
+    if isinstance(num, (list, tuple)):
+        return [number_exponent(n) for n in number_exponent]
+    elif not isinstance(num, str):
+        return number_exponent(str(num))
+    else:
+        return abs(Decimal(num).as_tuple().exponent)
