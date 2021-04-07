@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from commons.constants import CANDLE_DATETIME_COLUMN, POSITION_COLUMN, CANDLE_LOW_COLUMN, CANDLE_HIGH_COLUMN
-from commons.math import np_floor_to_precision
+from commons.math import floor_to_precision
 from evaluation.slippage import price_with_slippage
 
 
@@ -19,7 +19,7 @@ def _contract_number(price, cash, leverage_rate, face_value, min_trade_precision
     """
     买入合约数 = 固定资金 * 杠杆 / (合约面值 * 开盘价)
     """
-    return np_floor_to_precision(cash * leverage_rate / (face_value * price), min_trade_precision)
+    return floor_to_precision(cash * leverage_rate / (face_value * price), min_trade_precision)
 
 
 def _future_margin(price, contract_num, cash, face_value, commission):

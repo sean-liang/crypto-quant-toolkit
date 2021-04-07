@@ -8,14 +8,17 @@ class VariantParameters:
     """
     优化参数解析与管道模板生成
     """
+
     def __init__(self, template, variables):
         self._template_context = template.get('context', {})
         self._template_actions = template['actions']
         self._variables, self._total = _parse_variables(self._template_actions, variables)
 
-    def generate_template(self, variables, *, auto_precision=False):
-        if len(variables) != len(self._variables):
-            raise RuntimeError(f'variable number mismatch, expect {len(self._variables)}, got{len(variables)}')
+    def generate_template(self, variables):
+        """
+        根据传入参数生成管道配置
+        """
+        self._check_variables(variables)
         template = self._template_actions.copy()
         for i, v in enumerate(variables):
             value = None
@@ -25,10 +28,26 @@ class VariantParameters:
             template[conf['index']]['params'][conf['name']] = value
         return template
 
+    def auto_precision(self, variables):
+        """
+        根据步长精度自动转换精度
+        """
+        self._check_variables(variables)
+        for i, v in enumerate(variables):
+            conf = self._variables[i]
+            step = conf['step']
+
     def extended_context(self, another_context):
+        """
+        覆盖更新策略原上下文
+        """
         ctx = self._template_context.copy()
         ctx.update(another_context)
         return ctx
+
+    def _check_variables(self, variables):
+        if len(variables) != len(self._variables):
+            raise RuntimeError(f'variable number mismatch, expect {len(self._variables)}, got{len(variables)}')
 
     @property
     def parameter_names(self):
@@ -55,6 +74,9 @@ class VariantParameters:
 
 
 def _parse_variables(actions, variables):
+    """
+    解析待优化参数配置
+    """
     total = 1 if variables else 0
     var_conf_list = []
     for action in variables:

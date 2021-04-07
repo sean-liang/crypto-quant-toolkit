@@ -1,19 +1,19 @@
 import numpy as np
-import math
 
 
-def np_floor_to_precision(data, precision=0):
+def floor_to_precision(data, decimal_place=0):
     """
     向下取整到指定位数
     """
-    return np.floor(data * (10 ** precision)) / (10 ** precision)
+    return np.floor(data * (10 ** decimal_place)) / (10 ** decimal_place)
 
 
-def auto_round(data, precision, *, min_precision=2):
+def auto_round(data, step=1):
     """
-    四舍五入
+    根据步长自动四舍五入
     """
-    if isinstance(data, np.ndarray):
-        return np.round(data) if precision >= 1 else np.round(data * (10 ** min_precision)) / (10 ** min_precision)
-    elif isinstance(data, float):
-        return round(data) if precision >= 1 else round(data * (10 ** min_precision)) / (10 ** min_precision)
+    is_list = isinstance(data, (list, tuple))
+    data = np.array(data) if is_list else data
+    rounds = np.round(data / step) * step
+    rounds = rounds.tolist() if is_list else rounds
+    return rounds

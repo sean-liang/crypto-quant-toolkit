@@ -4,7 +4,7 @@ from optim.variant_parameters import VariantParameters
 from optim.optimizer import optimize_func, multiprocessing_optimize
 
 
-def optimize(df, target_template, variables, column, target='maximize'):
+def optimize(df, target_template, variables, column, target='maximize', result_precision=0.01):
     """
     枚举搜索最优参数
     """
