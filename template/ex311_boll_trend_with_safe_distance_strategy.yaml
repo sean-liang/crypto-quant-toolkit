@@ -1,4 +1,4 @@
-# 少年意气篇，使用币安现货数据对OKEX期货进行回测（非作业）
+# 少年意气篇大作业，根据收盘价距离均线距离选择开仓点
 actions:
   - method: indicator.volatility.bbands
     scopes: [backtesting, optimize]
@@ -11,8 +11,10 @@ actions:
     params:
       method: dropna
       inplace: true
-  - method: signals.bollinger.boll_trend
+  - method: signals.bollinger.boll_trend_with_safe_distance
     scopes: [backtesting, optimize]
+    params:
+      safe_distance_pct: 0.05
   - method: signals.commons.merge_long_short_signal
     scopes: [backtesting, optimize]
     params:
@@ -47,4 +49,4 @@ actions:
     scopes: [backtesting]
     params:
       method: to_parquet
-      path: ../runs/back_testing/ex301_equity_curve.parquet
+      path: ../runs/back_testing/ex311_equity_curve.parquet

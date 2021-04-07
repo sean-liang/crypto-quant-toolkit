@@ -1,7 +1,6 @@
 from multiprocessing.pool import Pool
 from tqdm import tqdm
 from pipeline.pipeline import Pipeline
-from commons.logging import log
 
 
 def optimize_func(variables, context, parameters, df, column):

@@ -15,5 +15,5 @@ actions:
   - method: data.pandas.with_dataframe
     scopes: [ backtesting ]
     params:
-      method: to_parquet
-      path: ../runs/optimize/ex311_parameters.parquet
+      method: to_csv
+      path_or_buf: ../runs/optimize/ex302_parameters.csv

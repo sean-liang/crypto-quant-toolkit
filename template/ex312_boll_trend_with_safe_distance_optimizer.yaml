@@ -1,0 +1,22 @@
+# 少年意气篇大作业，优化安全均线距离布林趋势策略参数
+context:
+  a: test
+actions:
+  - method: optim.grid_optimizer.optimize
+    params:
+      target_template: template/ex311_boll_trend_with_safe_distance_strategy.yaml
+      column: 'equity_curve'
+      target: 'maximize'
+      variables:
+        - method: indicator.volatility.bbands
+          params:
+            period: [ 10, 1000, 10 ]
+            width: [ 0.5, 5, 0.1 ]
+        - method: signals.bollinger.boll_trend_with_safe_distance
+          params:
+            safe_distance_pct: [ 0.01, 0.2, 0.01 ]
+  - method: data.pandas.with_dataframe
+    scopes: [ backtesting ]
+    params:
+      method: to_csv
+      path_or_buf: ../runs/optimize/ex312_parameters.csv
