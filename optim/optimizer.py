@@ -28,6 +28,7 @@ def multiprocessing_optimize(func, parameters, total):
                 res = [float(item) for item in res]
                 results.append(res)
                 pbar.update()
-                pbar.set_description(str(res))
+                res_str = [str(round(v, 2)) for v in res]
+                pbar.set_description(f'parameters: {", ".join(res_str[0:-1])}, result: {res_str[-1]}')
 
     return results

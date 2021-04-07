@@ -33,3 +33,13 @@ def boll_trend(df):
     df = merge_long_short_signal(df, fill_na=True, drop_original=True)
 
     return df
+
+
+def boll_trend_with_distance(df, distance):
+    """
+    布林趋势，加入价格与均线距离，在安全距离内开仓
+    """
+    # 计算标准的信号
+    df = boll_trend(df)
+
+    return df

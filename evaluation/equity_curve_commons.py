@@ -9,9 +9,9 @@ def _group_trade(df, open_cond, col='start_time'):
     """
     设置每组交易的开仓时间
     """
-    df['start_time'] = np.where(open_cond, df[CANDLE_DATETIME_COLUMN], pd.NaT)
+    df['start_time'] = np.where(open_cond, df[CANDLE_DATETIME_COLUMN], pd.NA)
     df['start_time'].fillna(method='ffill', inplace=True)
-    df['start_time'] = np.where(df[POSITION_COLUMN] == 0, pd.NaT, df['start_time'])
+    df['start_time'] = np.where(df[POSITION_COLUMN] == 0, pd.NA, df['start_time'])
     df['start_time'] = pd.to_datetime(df['start_time'])
 
 
