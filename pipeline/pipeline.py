@@ -5,12 +5,17 @@ from commons.logging import log
 
 
 class Pipeline:
-    """处理管道"""
+    """
+    处理管道
+    """
     def __init__(self, context={}):
         self.context = context
         self.actions = []
 
     def load(self, module_name, method_name, scopes, params={}):
+        """
+        动态载入管道方法
+        """
         module = importlib.import_module(module_name)
         method = getattr(module, method_name)
         params = params
@@ -21,6 +26,9 @@ class Pipeline:
         self.actions.append(func)
 
     def process(self, df, scopes=None):
+        """
+        处理数据
+        """
         if scopes and not isinstance(scopes, (set, list, tuple)):
             scopes = [scopes]
         if scopes and not isinstance(scopes, set):
@@ -32,14 +40,18 @@ class Pipeline:
 
     @staticmethod
     def build_from_template(path, *, verbose=False):
-        """从yaml配置文件构建管道"""
+        """
+        从yaml配置文件构建管道
+        """
         with open(path, 'r') as stream:
             config = yaml.load(stream, Loader=yaml.CLoader)
         return Pipeline.build(config['actions'], config.get('context', {}), verbose=verbose)
 
     @staticmethod
     def build(actions, context={}, *, verbose=False):
-        """从配置字典构建管道"""
+        """
+        从配置字典构建管道
+        """
         pipeline = Pipeline(context)
         for conf in actions:
             module_name, method_name = conf['method'].rsplit('.', 1)

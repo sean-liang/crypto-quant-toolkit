@@ -1,21 +1,33 @@
 from multiprocessing.pool import Pool
+from tqdm import tqdm
 from pipeline.pipeline import Pipeline
+from commons.logging import log
 
 
-def optimize_func(variables, context, parameters, df, column, verbose=False):
+def optimize_func(variables, context, parameters, df, column):
+    """
+    单次参数优化
+    """
     template = parameters.generate_template(variables)
     pipeline = Pipeline.build(template, context)
     df = df.copy()
     df = pipeline.process(df, scopes=['optimize'])
     value = df.iloc[-1][column]
     result = [*variables, value]
-    if verbose:
-        print(f'variables: {variables}, {column}: {value:.2f}')
     return result
 
 
-def multiprocessing_optimize(func, parameters):
+def multiprocessing_optimize(func, parameters, total):
+    """
+    多进程优化
+    """
+    results = []
     with Pool() as pool:
-        result = pool.map(func, parameters)
+        with tqdm(total=total) as pbar:
+            for res in pool.imap_unordered(func, parameters):
+                res = [float(item) for item in res]
+                results.append(res)
+                pbar.update()
+                pbar.set_description(str(res))
 
-    return result
+    return results

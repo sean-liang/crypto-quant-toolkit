@@ -3,6 +3,7 @@ from indicator.overlap import ma
 
 
 def bbands(df, col=CANDLE_CLOSE_COLUMN, period=200, width=2, ma_method='sma'):
+    """布林带指标"""
     period = int(period)
     width = float(width)
     series = df[col]

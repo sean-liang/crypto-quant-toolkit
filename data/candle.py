@@ -1,10 +1,12 @@
 from datetime import timedelta
 from commons.constants import CANDLE_COLUMNS, CANDLE_DATETIME_COLUMN, CANDLE_OPEN_COLUMN, CANDLE_CLOSE_COLUMN, CANDLE_HIGH_COLUMN, CANDLE_LOW_COLUMN, \
-    CANDLE_VOLUME_COLUMN, POSITION_COLUMN
+    CANDLE_VOLUME_COLUMN
 
 
 def resample_candle_time_window(df, period, drop_zero_volume=True, drop_zero_open=True):
-    """合成长时间K线"""
+    """
+    合成长时间K线
+    """
     period_df = df.resample(rule=period, on=CANDLE_DATETIME_COLUMN, label='left', closed='left').agg(
         {
             CANDLE_OPEN_COLUMN: 'first',

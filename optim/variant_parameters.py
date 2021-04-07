@@ -5,7 +5,9 @@ import yaml
 
 
 class VariantParameters:
-
+    """
+    优化参数解析与管道模板生成
+    """
     def __init__(self, template, variables):
         self._template_context = template.get('context', {})
         self._template_actions = template['actions']

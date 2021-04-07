@@ -7,7 +7,6 @@ actions:
       target_template: template/ex301_boll_trend_strategy.yaml
       column: 'equity_curve'
       target: 'maximize'
-      verbose: true
       variables:
         - method: indicator.volatility.bbands
           params:
