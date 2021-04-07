@@ -1,7 +1,8 @@
 from multiprocessing.pool import Pool
+import numpy as np
 from tqdm import tqdm
 from pipeline.pipeline import Pipeline
-from commons.math import auto_round
+from commons.math import number_exponent
 
 
 def optimize_func(variables, context, parameters, df, column):
@@ -16,18 +17,17 @@ def optimize_func(variables, context, parameters, df, column):
     return variables, result
 
 
-def multiprocessing_optimize(func, parameters, total, variable_precisions=[], result_precision=0.01):
+def multiprocessing_optimize(func, parameters, total, result_precision=0.01):
     """
     多进程优化
     """
-    if not variable_precisions:
-        variable_precisions = result_precision
+    result_exponent = number_exponent(result_precision)
     results = []
     with Pool() as pool:
         with tqdm(total=total) as pbar:
-            for variables, result in pool.imap_unordered(func, parameters):
-                variables = auto_round(variables, variable_precisions)
-                result = auto_round(result, result_precision)
+            for variables, result in pool.imap_unordered(func, parameters.parameter_product):
+                variables = parameters.auto_round(variables)
+                result = np.round(result, result_exponent)
                 results.append([*variables, result])
                 pbar.update()
                 pbar.set_description(f'parameters: {variables}, result: {result}')

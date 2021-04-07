@@ -2,6 +2,7 @@ import math
 import numpy as np
 from itertools import product
 import yaml
+from commons.math import number_exponent
 
 
 class VariantParameters:
@@ -13,6 +14,7 @@ class VariantParameters:
         self._template_context = template.get('context', {})
         self._template_actions = template['actions']
         self._variables, self._total = _parse_variables(self._template_actions, variables)
+        self._variable_decimal_places = [number_exponent(v['step']) for v in self._variables]
 
     def generate_template(self, variables):
         """
@@ -28,15 +30,6 @@ class VariantParameters:
             template[conf['index']]['params'][conf['name']] = value
         return template
 
-    def auto_precision(self, variables):
-        """
-        根据步长精度自动转换精度
-        """
-        self._check_variables(variables)
-        for i, v in enumerate(variables):
-            conf = self._variables[i]
-            step = conf['step']
-
     def extended_context(self, another_context):
         """
         覆盖更新策略原上下文
@@ -45,9 +38,20 @@ class VariantParameters:
         ctx.update(another_context)
         return ctx
 
+    def auto_round(self, variables):
+        """
+        自动四舍五入
+        """
+        self._check_variables(variables)
+        return [np.round(v, self._variable_decimal_places[i]) for i, v in enumerate(variables)]
+
     def _check_variables(self, variables):
         if len(variables) != len(self._variables):
             raise RuntimeError(f'variable number mismatch, expect {len(self._variables)}, got{len(variables)}')
+
+    @property
+    def variable_decimal_places(self):
+        return self._variable_decimal_places
 
     @property
     def parameter_names(self):

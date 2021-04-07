@@ -1,3 +1,4 @@
+from decimal import Decimal
 import numpy as np
 
 
@@ -8,12 +9,10 @@ def floor_to_precision(data, decimal_place=0):
     return np.floor(data * (10 ** decimal_place)) / (10 ** decimal_place)
 
 
-def auto_round(data, step=1):
-    """
-    根据步长自动四舍五入
-    """
-    is_list = isinstance(data, (list, tuple))
-    data = np.array(data) if is_list else data
-    rounds = np.round(data / step) * step
-    rounds = rounds.tolist() if is_list else rounds
-    return rounds
+def number_exponent(num):
+    if isinstance(num, (list, tuple)):
+        return [number_exponent(n) for n in number_exponent]
+    elif not isinstance(num, str):
+        return number_exponent(str(num))
+    else:
+        return abs(Decimal(num).as_tuple().exponent)
