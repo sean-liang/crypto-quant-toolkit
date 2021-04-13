@@ -5,6 +5,12 @@ from commons.constants import CANDLE_COLUMNS, CANDLE_DATETIME_COLUMN
 DEFAULT_HDF_KEY = '/df'
 
 
+def mkdir(df, path):
+    path = Path(path)
+    path.mkdir(parents=True, exist_ok=True)
+    return df
+
+
 def extension(path):
     return path.name.split('.')[-1].strip().lower()
 

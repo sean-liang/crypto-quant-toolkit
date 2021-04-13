@@ -41,12 +41,7 @@ actions:
       slippage: 0.001
       leverage_rate: 3
       min_margin_ratio: 0.01
-  - method: evaluation.report.draw_equity_curve
-    scopes: [backtesting]
+  - method: evaluation.report.common_back_testing_report
+    scopes: [ backtesting ]
     params:
-      path: ../runs/back_testing/ex301_equity_curve.png
-  - method: data.pandas.with_dataframe
-    scopes: [backtesting]
-    params:
-      method: to_parquet
-      path: ../runs/back_testing/ex311_equity_curve.parquet
+      path: ../runs/back_testing/ex311

@@ -1,8 +1,9 @@
 import numpy as np
-from commons.constants import CANDLE_OPEN_COLUMN, CANDLE_CLOSE_COLUMN, CANDLE_LOW_COLUMN, CANDLE_HIGH_COLUMN, POSITION_COLUMN, EQUITY_CURVE_COLUMN
+from commons.constants import CANDLE_OPEN_COLUMN, CANDLE_CLOSE_COLUMN, POSITION_COLUMN, EQUITY_CHANGE_COLUMN, EQUITY_CURVE_COLUMN
 
 from data.candle import add_next_open
-from evaluation.equity_curve_commons import _group_trade, _contract_number, _future_margin, _fill_unchanged_columns, _net_value, _blow_up, _equity_curve
+from evaluation.equity_curve_commons import _group_trade, _contract_number, _future_margin, _fill_unchanged_columns, _net_value, _blow_up, _equity_change, \
+    _equity_curve
 from evaluation.position import _open_close_position_condition
 from evaluation.slippage import price_with_slippage
 
@@ -33,6 +34,7 @@ def future_equity_curve(df, cash=10000, face_value=0.01, min_trade_precision=0, 
     # 计算爆仓
     _blow_up(df, close_cond, face_value, min_margin_ratio, commission, col='blow_up')
     # 计算资金曲线
-    df[EQUITY_CURVE_COLUMN] = _equity_curve(df['net_value'], open_cond, cash)
+    df[EQUITY_CHANGE_COLUMN] = _equity_change(df['net_value'], open_cond, cash)
+    df[EQUITY_CURVE_COLUMN] = _equity_curve(df[EQUITY_CHANGE_COLUMN])
 
     return df
