@@ -29,5 +29,18 @@ if __name__ == '__main__':
     res = pipeline.process(data, scopes=set(args.scopes) if args.scopes else None)
     end_time = timeit.default_timer()
     elapse = end_time - start_time
-    print(res)
+
+    if isinstance(res, (tuple, list)):
+        for item in res:
+            print('-' * 150)
+            print(item)
+    elif isinstance(res, dict):
+        for key in res:
+            size = (150 - len(key)) // 2
+            print('-' * size, key, '-' * size)
+            print(res[key])
+    else:
+        print('-' * 150)
+        print(res)
+    print('-' * 150)
     print(f'done, takes {elapse:.2f}s')

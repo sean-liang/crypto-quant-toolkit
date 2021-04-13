@@ -1,35 +1,35 @@
 # 少年意气篇，使用币安现货数据对OKEX期货进行回测（非作业）
 actions:
   - method: indicator.volatility.bbands
-    scopes: [backtesting, optimize]
+    scopes: [ backtesting, optimize ]
     params:
       period: 400
       width: 2
       ma_method: sma
   - method: data.pandas.with_dataframe
-    scopes: [backtesting, optimize]
+    scopes: [ backtesting, optimize ]
     params:
       method: dropna
       inplace: true
   - method: signals.bollinger.boll_trend
-    scopes: [backtesting, optimize]
+    scopes: [ backtesting, optimize ]
   - method: signals.commons.merge_long_short_signal
-    scopes: [backtesting, optimize]
+    scopes: [ backtesting, optimize ]
     params:
       fill_na: true
       drop_original: true
   - method: evaluation.position.position_from_signal
-    scopes: [backtesting, optimize]
+    scopes: [ backtesting, optimize ]
   - method: evaluation.position.disallow_transaction_daily
-    scopes: [backtesting, optimize]
+    scopes: [ backtesting, optimize ]
     params:
       time: '16:00'
   - method: data.candle.skip_days
-    scopes: [backtesting, optimize]
+    scopes: [ backtesting, optimize ]
     params:
       days: 10
   - method: evaluation.engine.okex.future_equity_curve
-    scopes: [backtesting, optimize]
+    scopes: [ backtesting, optimize ]
     params:
       cash: 1000000
       face_value: 0.01
@@ -39,12 +39,7 @@ actions:
       slippage: 0.001
       leverage_rate: 3
       min_margin_ratio: 0.01
-  - method: evaluation.report.draw_equity_curve
-    scopes: [backtesting]
+  - method: evaluation.report.common_back_testing_report
+    scopes: [ backtesting ]
     params:
-      path: ../runs/back_testing/ex301_equity_curve.png
-  - method: data.pandas.with_dataframe
-    scopes: [backtesting]
-    params:
-      method: to_parquet
-      path: ../runs/back_testing/ex301_equity_curve.parquet
+      path: ../runs/back_testing/ex301

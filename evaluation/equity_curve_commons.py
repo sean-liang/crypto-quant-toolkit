@@ -79,11 +79,18 @@ def _blow_up(df, close_cond, face_value, min_margin_ratio, commission, *, col='b
     df.loc[df[col] == 1, 'net_value'] = 0
 
 
-def _equity_curve(net_value, open_cond, cash):
+def _equity_change(net_value, open_cond, cash):
     """
-    计算资金曲线
+    计算资金变化
     """
     equity_change = net_value.pct_change()
     equity_change.loc[open_cond] = net_value.loc[open_cond] / cash - 1  # 开仓日的收益率
     equity_change.fillna(value=0, inplace=True)
+    return equity_change
+
+
+def _equity_curve(equity_change):
+    """
+    计算资金曲线
+    """
     return (1 + equity_change).cumprod()
