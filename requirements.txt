@@ -13,3 +13,4 @@ pyarrow
 tables
 matplotlib
 seaborn
+numba

@@ -1,6 +1,4 @@
 # 少年意气篇大作业，优化安全均线距离布林趋势策略参数
-context:
-  a: test
 actions:
   - method: optim.grid_optimizer.optimize
     params:

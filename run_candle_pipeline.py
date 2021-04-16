@@ -1,5 +1,6 @@
 import argparse
 import timeit
+from pathlib import Path
 from commons.io import load_candle_by_ext
 from commons.datetime_utils import str_to_timezone
 from commons.dataframe_utils import filter_candle_dataframe_by_begin_end_offset_datetime
@@ -8,7 +9,7 @@ from pipeline.pipeline import Pipeline
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='run back testing')
     parser.add_argument('pipeline', help='pipeline template file')
-    parser.add_argument('input', help='history candle file')
+    parser.add_argument('input', help='history candle files')
     parser.add_argument('-s', '--scopes', nargs='+', help='pipeline scopes')
     parser.add_argument('-b', '--begin', help='begin date')
     parser.add_argument('-d', '--end', help='end date')

@@ -8,7 +8,6 @@ from commons.constants import CANDLE_DATETIME_COLUMN, CANDLE_CLOSE_COLUMN, CANDL
 def transfer_equity_curve_to_trade(equity_curve):
     """
     将资金曲线数据，转化为一笔一笔的交易
-    :param equity_curve: 资金曲线函数计算好的结果，必须包含pos
     """
     # 选取开仓、平仓条件
     condition1 = equity_curve[POSITION_COLUMN] != 0
@@ -63,32 +62,42 @@ def strategy_evaluate(dfs):
     results = pd.DataFrame()
 
     # 计算累积净值
-    results.loc[0, 'Cumulative Net Value'] = round(equity_curve['equity_curve'].iloc[-1], 2)
+    results.loc[0, 'Cumulative Net Value'] = round(equity_curve[EQUITY_CURVE_COLUMN].iloc[-1], 2)
 
     # 计算年化收益
-    annual_return = (equity_curve['equity_curve'].iloc[-1] / equity_curve['equity_curve'].iloc[0]) ** (
-            '1 days 00:00:00' / (equity_curve['candle_begin_time'].iloc[-1] - equity_curve['candle_begin_time'].iloc[0]) * 365) - 1
-    results.loc[0, 'Annual Rate of Return'] = round(annual_return, 2)
+    annual_return = (equity_curve[EQUITY_CURVE_COLUMN].iloc[-1] / equity_curve[EQUITY_CURVE_COLUMN].iloc[0]) ** (
+            '1 days 00:00:00' / (equity_curve[CANDLE_DATETIME_COLUMN].iloc[-1] - equity_curve[CANDLE_DATETIME_COLUMN].iloc[0]) * 365) - 1
+    results.loc[0, 'CAGR'] = round(annual_return, 2)
 
     # 计算最大回撤
     # 计算当日之前的资金曲线的最高点
-    equity_curve['max2here'] = equity_curve['equity_curve'].expanding().max()
+    equity_curve['max2here'] = equity_curve[EQUITY_CURVE_COLUMN].expanding().max()
     # 计算到历史最高值到当日的跌幅，drawdown
-    equity_curve['dd2here'] = equity_curve['equity_curve'] / equity_curve['max2here'] - 1
+    equity_curve['dd2here'] = equity_curve[EQUITY_CURVE_COLUMN] / equity_curve['max2here'] - 1
+
+    # 年化收益/平均回撤比
+    results.loc[0, 'CAGR / Mean DD'] = round(abs(annual_return / equity_curve['dd2here'].mean()), 2)
+
     # 计算最大回撤，以及最大回撤结束时间
-    end_date, max_draw_down = tuple(equity_curve.sort_values(by=['dd2here']).iloc[0][['candle_begin_time', 'dd2here']])
+    end_date, max_draw_down = tuple(equity_curve.sort_values(by=['dd2here']).iloc[0][[CANDLE_DATETIME_COLUMN, 'dd2here']])
     # 计算最大回撤开始时间
-    start_date = equity_curve[equity_curve['candle_begin_time'] <= end_date].sort_values(by='equity_curve', ascending=False).iloc[0]['candle_begin_time']
+    start_date = equity_curve[equity_curve[CANDLE_DATETIME_COLUMN] <= end_date].sort_values(by=EQUITY_CURVE_COLUMN, ascending=False).iloc[0][
+        CANDLE_DATETIME_COLUMN]
+    # 年化收益/回撤比
+    results.loc[0, 'CAGR / Max DD'] = round(abs(annual_return / max_draw_down), 2)
+
+    # 皮尔森相关系数
+    corr_coef = np.corrcoef(x=equity_curve[CANDLE_DATETIME_COLUMN].values.astype(np.int64), y=equity_curve[EQUITY_CURVE_COLUMN])[0, 1]
+    results.loc[0, 'Correlation Coefficient'] = round(corr_coef, 4)
+
     # 将无关的变量删除
     equity_curve.drop(['max2here', 'dd2here'], axis=1, inplace=True)
     results.loc[0, 'Maximum Drawdown'] = format(max_draw_down, '.2%')
     results.loc[0, 'Maximum Drawdown Begin'] = str(start_date)
     results.loc[0, 'Maximum Drawdown End'] = str(end_date)
 
-    # 年化收益/回撤比
-    results.loc[0, 'Annualized Return/Drawdown Ratio'] = round(abs(annual_return / max_draw_down), 2)
-
     # 统计每笔交易
+    results.loc[0, 'Number of Trades'] = trade.shape[0]  # 总交易笔数
     results.loc[0, 'Number of Win'] = len(trade.loc[trade['change'] > 0])  # 盈利笔数
     results.loc[0, 'Number of Loss'] = len(trade.loc[trade['change'] <= 0])  # 亏损笔数
     results.loc[0, 'Win Rate'] = format(results.loc[0, 'Number of Win'] / len(trade), '.2%')  # 胜率
@@ -120,10 +129,6 @@ def strategy_evaluate(dfs):
     # 连续盈利亏算
     results.loc[0, 'Maximum Consecutive Profit'] = max([len(list(v)) for k, v in itertools.groupby(np.where(trade['change'] > 0, 1, np.nan))])  # 最大连续盈利笔数
     results.loc[0, 'Maximum Consecutive Loss'] = max([len(list(v)) for k, v in itertools.groupby(np.where(trade['change'] < 0, 1, np.nan))])  # 最大连续亏损笔数
-
-    results = results.T
-    results.index.name = 'name'
-    results.columns = ['value']
 
     return results
 

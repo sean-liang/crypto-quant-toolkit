@@ -1,0 +1,47 @@
+# 策略001，布林趋势
+actions:
+  - method: indicator.volatility.bbands
+    scopes: [backtesting, optimize]
+    params:
+      period: 360
+      width: 2
+      ma_method: sma
+  - method: data.pandas.with_dataframe
+    scopes: [backtesting, optimize]
+    params:
+      method: dropna
+      inplace: true
+  - method: signals.bollinger.boll_trend_with_safe_distance
+    scopes: [backtesting, optimize]
+    params:
+      safe_distance_pct: 0.07
+  - method: signals.commons.merge_long_short_signal
+    scopes: [backtesting, optimize]
+    params:
+      fill_na: true
+      drop_original: true
+  - method: evaluation.position.position_from_signal
+    scopes: [backtesting, optimize]
+  - method: evaluation.position.disallow_transaction_daily
+    scopes: [backtesting, optimize]
+    params:
+      time: '16:00'
+  - method: data.candle.skip_days
+    scopes: [backtesting, optimize]
+    params:
+      days: 10
+  - method: evaluation.engine.okex.future_equity_curve
+    scopes: [backtesting, optimize]
+    params:
+      cash: 1000000
+      face_value: 0.01
+      min_trade_precision: 0
+      commission: 0.0005
+      slippage_mode: ratio
+      slippage: 0.001
+      leverage_rate: 3
+      min_margin_ratio: 0.01
+  - method: evaluation.report.common_back_testing_report
+    scopes: [ backtesting ]
+    params:
+      path: ../runs/back_testing/s001
