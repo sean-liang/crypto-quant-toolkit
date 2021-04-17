@@ -70,11 +70,14 @@ if __name__ == '__main__':
     start_time = timeit.default_timer()
     results = run_multi_sim(args.times, args.systems, args.trades, args.max_edge, args.pnl)
 
-    rank_mean = np.mean(results[:, 0])
-    rank_std = np.std(results[:, 0])
-    edge_mean = np.mean(results[:, 1])
-    edge_std = np.std(results[:, 1])
-    print(f'rank mean: {rank_mean:.2f}, std: {rank_std:.4f}')
+    rank_res = results[:, 0]
+    rank_mean = np.mean(rank_res)
+    rank_std = np.std(rank_res)
+    edge_res = results[:, 1]
+    edge_mean = np.mean(edge_res)
+    edge_std = np.std(edge_res)
+    prob = rank_res[rank_res <= 3].shape[0] / edge_res.shape[0]
+    print(f'rank mean: {rank_mean:.2f}, std: {rank_std:.4f}, top 3 probability: {prob * 100:.2f}%')
     print(f'edge mean: {edge_mean:.4f}, std: {edge_std:.4f}')
 
     elapse = timeit.default_timer() - start_time

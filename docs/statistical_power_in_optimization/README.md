@@ -6,13 +6,17 @@
 
 我们在历史数据上进行策略的回测，从统计学的角度看，是根据样本推断总体特征。那么，我们就需要有足够的交易笔数才能认为回测结果是统计显著的，才有参考价值。
 
-下图是两个参数优化的模拟结果，图中最粗的曲线是唯一有效的，胜率为60%，其他都是随机盈亏。
+下图是三个参数优化的模拟结果，图中最粗的曲线是唯一有效的，胜率为60%，其他都是随机盈亏。
 
 ![100 Trades](101.png)
 
-![1000 Trades](102.png)
+![5 Trades](102.png)
 
-可以看到，图一经过了100次交易，最有效的参数组合在总体排名中处于中间位置，而图二经过1000次交易，最优参数组合遥遥领先。因此，在成交笔数不足的情况下，我们有一定概率选不到真正有效的参数。
+![1000 Trades](103.png)
+
+可以看到，图一有50组参数，经过了100次交易，最有效的参数组合在总体排名中处于中间位置。图二只有5组备选参数，经过同样的100次交易，有效参数略占优势。而图三同样有50组参数，经过1000次交易，最优参数组合遥遥领先。因此，在成交笔数相对参数数量不足的情况下，我们有一定概率选不到真正有效的参数。
+
+多次模拟，图一、图二的结果可能会不同，但图三的中的有效策参数终可以显著跑赢其他参数。
 
 ## 统计功效分析
 
@@ -95,11 +99,14 @@ if __name__ == '__main__':
     start_time = timeit.default_timer()
     results = run_multi_sim(args.times, args.systems, args.trades, args.max_edge, args.pnl)
 
-    rank_mean = np.mean(results[:, 0])
-    rank_std = np.std(results[:, 0])
-    edge_mean = np.mean(results[:, 1])
-    edge_std = np.std(results[:, 1])
-    print(f'rank mean: {rank_mean:.2f}, std: {rank_std:.4f}')
+    rank_res = results[:, 0]
+    rank_mean = np.mean(rank_res)
+    rank_std = np.std(rank_res)
+    edge_res = results[:, 1]
+    edge_mean = np.mean(edge_res)
+    edge_std = np.std(edge_res)
+    prob = rank_res[rank_res <= 3].shape[0] / edge_res.shape[0]
+    print(f'rank mean: {rank_mean:.2f}, std: {rank_std:.4f}, top 3 probability: {prob * 100:.2f}%')
     print(f'edge mean: {edge_mean:.4f}, std: {edge_std:.4f}')
 
     elapse = timeit.default_timer() - start_time
@@ -111,15 +118,15 @@ if __name__ == '__main__':
 下边以少年意气篇3.3.8遍历策略参数为例，其参数组合总数为均线长度`range(10, 1000, 10)`共99个参数，标准差`[i / 10 for i in list(np.arange(5, 50, 1))]`共45个参数，两者相乘，共4455个参数，在历史数据上回测的交易笔数为199。策略的最大edge假设为10%。
 
 ```shell
-> python statistical_power_sim.py -n 10000 -s 4455 -t 199 -e 0.1
+> python stats_power_sim.py -n 10000 -s 4455 -t 199 -e 0.1
 
 Run simulation with arguments: Namespace(max_edge=0.1, pnl=0.01, systems=4455, times=10000, trades=199)
-rank mean: 331.27, std: 306.1791
-edge mean: 0.0920, std: 0.0076
-done, takes 12.73s
+rank mean: 332.31, std: 320.6291, top 3 probability: 1.49%
+edge mean: 0.0918, std: 0.0079
+done, takes 96.29s
 ```
 
-经过10000次模拟之后，可以看到最优参数的排名平均在331名，很难被选到，但是选到的参数大概率可以有9%的edge。 
+经过10000次模拟之后，可以看到最优参数的排名平均在332名，进入前三的概率只有1%，很难被选到，但是选到的参数大概率可以有9%的edge。 
 
 模拟并不能确定这个策略有效，因为我们模拟的假设是策略存在10%的edge，以及策略的edge均匀分布，这个假设可能不成立。
 
