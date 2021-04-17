@@ -16,7 +16,7 @@ def extension(path):
 
 
 def load_by_ext(path, **kwargs):
-    if isinstance(path, str):
+    if not isinstance(path, Path):
         path = Path(path)
     ext = extension(path)
     if ext == 'csv':

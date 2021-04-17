@@ -1,4 +1,5 @@
 from pathlib import Path
+import numpy as np
 import matplotlib.pyplot as plt
 from commons.constants import CANDLE_DATETIME_COLUMN, EQUITY_CURVE_COLUMN, CANDLE_CLOSE_COLUMN
 from evaluation.statistics import transfer_equity_curve_to_trade, strategy_evaluate, monthly_return
@@ -7,11 +8,17 @@ from evaluation.statistics import transfer_equity_curve_to_trade, strategy_evalu
 def draw_equity_curve(df, path):
     # 保存结果
     print(f'saving equity curve image to {path}')
-    ec_df = df[[EQUITY_CURVE_COLUMN, CANDLE_CLOSE_COLUMN]]
+    ec_df = df[[EQUITY_CURVE_COLUMN, CANDLE_CLOSE_COLUMN]].copy()
     ec_df.index = df[CANDLE_DATETIME_COLUMN]
 
     plt.figure(figsize=(20, 10))
     ec_df[EQUITY_CURVE_COLUMN].plot(style='r', legend=True)
+
+    x = ec_df.index.values.astype(np.int64)
+    coef = np.polyfit(x=x, y=ec_df[EQUITY_CURVE_COLUMN], deg=1)
+    ec_df['EQUITY_CURVE_FIT'] = x * coef[0] + coef[1]
+    ec_df['EQUITY_CURVE_FIT'].plot(style='g')
+
     ec_df[CANDLE_CLOSE_COLUMN].plot(secondary_y=True, style="b", legend=True)
     plt.savefig(path)
     return df
@@ -32,6 +39,9 @@ def common_back_testing_report(df, path, *, equity_curve_data=True, equity_curve
         trades.to_csv(path / 'trade.csv')
 
     ev = strategy_evaluate((df, trades))
+    ev = ev.T
+    ev.index.name = 'name'
+    ev.columns = ['value']
     if evaluation_data:
         ev.T.to_csv(path / 'evaluation_result.csv')
 
@@ -39,4 +49,4 @@ def common_back_testing_report(df, path, *, equity_curve_data=True, equity_curve
     if monthly_return_data:
         monthly_rtn.to_csv(path / 'monthly_return.csv')
 
-    return {'equity_curve': df, 'trades': trades, 'evaluation_result': ev, 'monthly_return': monthly_rtn}
+    return {'equity_curve': df, 'trades': trades, 'monthly_return': monthly_rtn, 'evaluation_result': ev}

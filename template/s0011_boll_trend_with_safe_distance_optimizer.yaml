@@ -1,18 +1,19 @@
-# 少年意气篇，对布林趋势策略进行参数优化（非作业）
 actions:
   - method: optim.grid_optimizer.optimize
     params:
-      target_template: template/ex301_boll_trend_strategy.yaml
+      target_template: template/s0010_boll_trend_with_safe_distance_strategy.yaml
       column: 'equity_curve'
       target: 'maximize'
       result_precision: 0.01
       variables:
         - method: indicator.volatility.bbands
           params:
-            period: [ 10, 1000, 10 ]
-            width: [ 0.5, 5, 0.1 ]
+            period: [ 100, 1000, 20 ]
+        - method: signals.bollinger.boll_trend_with_safe_distance
+          params:
+            safe_distance_pct: [ 0.01, 0.1, 0.01 ]
   - method: data.pandas.with_dataframe
     scopes: [ backtesting ]
     params:
       method: to_csv
-      path_or_buf: ../runs/optimize/ex302_parameters.csv
+      path_or_buf: ../runs/optimize/ex312_parameters.csv
